@@ -127,6 +127,36 @@ class ParseTests(unittest.TestCase):
             ],
         )
 
+    def test_python_block_keeps_code_as_written(self):
+        text = "\n".join([
+            "```text",
+            "PYTHON[K7Q2]:",
+            "import csv",
+            "",
+            "for row in csv.reader(open('a.csv', encoding='utf-8')):",
+            "    print('行：', row)",
+            "END_PYTHON",
+            "TOOL[K7Q2]: Get-Location",
+            "```",
+        ])
+        directives, error = clip_agent.parse_batch(text, SESSION, 5)
+        self.assertIsNone(error)
+        self.assertEqual([item.kind for item in directives], ["PYTHON", "TOOL"])
+        self.assertEqual(
+            directives[0].body,
+            "import csv\n\nfor row in csv.reader(open('a.csv', encoding='utf-8')):\n    print('行：', row)",
+        )
+
+    def test_python_block_needs_end_and_right_code(self):
+        directives, error = clip_agent.parse_batch(
+            "PYTHON[K7Q2]:\nprint(1)\nTOOL[K7Q2]: Get-Location", SESSION, 5,
+        )
+        self.assertIsNone(directives)
+        self.assertIn("END_PYTHON", error)
+        directives, error = clip_agent.parse_batch("PYTHON[ZZZZ]:\nprint(1)\nEND_PYTHON", SESSION, 5)
+        self.assertIsNone(directives)
+        self.assertIn("会话码", error)
+
     def test_read_spec_range(self):
         spec = clip_agent.parse_read_spec(r"result:3#L10-20")
         self.assertEqual(spec["type"], "result")
@@ -339,6 +369,184 @@ class ConsoleTests(unittest.TestCase):
         _, written, said = self.feed(["TOOL[ZZZZ]: Get-Location"], runtime)
         self.assertIn("[REJECTED]", written[0])
         self.assertIn("说明", said)
+
+
+class PythonBlockTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name).resolve()
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def block(self, code):
+        return "PYTHON[K7Q2]:\n%s\nEND_PYTHON" % code
+
+    def test_readonly_never_runs_python(self):
+        runtime = make_runtime(self.root)
+        asked = []
+        rendered = clip_agent.handle_text(
+            self.block("print(1)"), runtime, fake_executor, lambda *args: asked.append(args) or True,
+        )
+        self.assertEqual(asked, [])
+        self.assertIn("BLOCKED PYTHON", rendered)
+        self.assertIn("只读档", rendered)
+        self.assertEqual(runtime.audit.records[-1]["decision"], "block")
+
+    def test_tiered_shows_whole_code_before_running(self):
+        runtime = make_runtime(self.root, mode="tiered")
+        code = "import csv\nprint('合计', 3)"
+        asked = []
+        rendered = clip_agent.handle_text(
+            self.block(code), runtime, fake_executor,
+            lambda command, reason: asked.append(command) or True,
+        )
+        self.assertEqual(len(asked), 1)
+        self.assertIn(code, asked[0])
+        self.assertIn("[RESULT #1] PYTHON 2 行", rendered)
+        self.assertEqual(runtime.audit.records[-1]["decision"], "allow")
+        self.assertIn("print('合计', 3)", runtime.audit.records[-1]["directive"])
+
+    def test_risky_code_is_blocked_without_asking(self):
+        risky = [
+            "import subprocess\nsubprocess.run(['whoami'])",
+            "import os\nos.system('dir')",
+            "import urllib.request\nurllib.request.urlopen('http://example.com')",
+            "import pandas as pd\npd.read_csv('https://example.com/a.csv')",
+            "import shutil\nshutil.rmtree('data')",
+            "from pathlib import Path\nPath('a.txt').unlink()",
+            "eval('1+1')",
+            "__import__('os')",
+            "import ctypes",
+            "import pandas as pd\npd.read_clipboard()",
+            "print(open('.env').read())",
+        ]
+        for code in risky:
+            with self.subTest(code=code):
+                decision, reason = clip_agent.classify_python(code, "tiered")
+                self.assertEqual(decision, "block", reason)
+
+    def test_everyday_analysis_code_goes_to_confirmation(self):
+        fine = [
+            "import re\nprint(re.compile(r'\\d+').findall('a1b22'))",
+            "import pandas as pd\ndf = pd.read_csv('samples/sales.csv')\n"
+            "print(df.groupby('品类')['销量'].sum())\nprint(df.eval('销量 * 单价').sum())",
+            "# 不调用 subprocess，也不联网\nprint('a-b'.replace('-', '+'))",
+            "import csv\nrows = list(csv.DictReader(open('samples/sales.csv', encoding='utf-8')))\nprint(len(rows))",
+        ]
+        for code in fine:
+            with self.subTest(code=code):
+                self.assertEqual(clip_agent.classify_python(code, "tiered")[0], "confirm")
+
+    def test_runs_in_project_dir_and_project_files_cannot_shadow_stdlib(self):
+        (self.root / "data.csv").write_text("名称,数量\n苹果,3\n香蕉,4\n", encoding="utf-8")
+        (self.root / "csv.py").write_text("raise RuntimeError('项目里的同名文件')\n", encoding="utf-8")
+        code = (
+            "import csv\n"
+            "rows = list(csv.DictReader(open('data.csv', encoding='utf-8')))\n"
+            "print('合计', sum(int(row['数量']) for row in rows))"
+        )
+        result = clip_agent.run_python(code, self.root, 30)
+        self.assertEqual(result.exit_code, 0, result.text)
+        self.assertIn("合计 7", result.text)
+
+    def test_errors_and_timeouts_come_back_as_results(self):
+        result = clip_agent.run_python("print('开始')\nraise SystemExit(3)", self.root, 30)
+        self.assertEqual(result.exit_code, 3)
+        self.assertIn("开始", result.text)
+        started = time.time()
+        result = clip_agent.run_python("import time\nprint('等一下')\ntime.sleep(30)", self.root, 2)
+        self.assertTrue(result.timed_out)
+        self.assertIn("等一下", result.text)
+        self.assertLess(time.time() - started, 12)
+
+    def test_runs_isolated_without_console_window(self):
+        captured = {}
+        original = subprocess.Popen
+
+        def spy(args, **kwargs):
+            captured["args"] = args
+            captured["flags"] = kwargs.get("creationflags", 0)
+            return original(args, **kwargs)
+
+        subprocess.Popen = spy
+        try:
+            clip_agent.run_python("print(1)", self.root, 30)
+        finally:
+            subprocess.Popen = original
+        self.assertIn("-I", captured["args"])
+        self.assertTrue(captured["flags"] & subprocess.CREATE_NO_WINDOW)
+        self.assertEqual(Path(captured["args"][0]).name.lower(), "python.exe")
+
+    def test_tiered_batch_runs_python_through_real_executor(self):
+        runtime = make_runtime(self.root, mode="tiered")
+        runtime.timeout = 30
+        rendered = clip_agent.handle_text(
+            self.block("print(sum(range(5)))"), runtime, clip_agent.real_execute, lambda *_: True,
+        )
+        self.assertIn("exit=0", rendered)
+        self.assertIn("10", rendered)
+
+
+class RespondTests(unittest.TestCase):
+    def test_results_come_with_items_and_no_hints(self):
+        runtime = make_runtime(tempfile.gettempdir())
+        reply = clip_agent.respond(
+            "先看位置\nTOOL[K7Q2]: Get-Location", runtime, fake_executor, lambda *_: True,
+        )
+        self.assertIn("[RESULT #1] TOOL Get-Location", reply.payload)
+        self.assertEqual([item.decision for item in reply.items], ["allow"])
+        self.assertEqual(reply.notes, [])
+
+    def test_rejection_names_the_reason_but_not_the_code(self):
+        runtime = make_runtime(tempfile.gettempdir())
+        reply = clip_agent.respond("PYTHON[K7Q2]:\nprint(1)", runtime, fake_executor, lambda *_: True)
+        self.assertIn("[REJECTED]", reply.payload)
+        self.assertIn("END_PYTHON", reply.payload)
+        self.assertNotIn(SESSION, reply.payload)
+        self.assertTrue(reply.notes)
+        self.assertEqual(runtime.audit.records[-1]["decision"], "reject")
+
+    def test_prose_and_pasted_brief_write_nothing(self):
+        runtime = make_runtime(tempfile.gettempdir())
+        reply = clip_agent.respond("好的，我先看看", runtime, fake_executor, lambda *_: True)
+        self.assertIsNone(reply.payload)
+        self.assertNotIn("PYTHON", reply.notes[0])
+        runtime = make_runtime(tempfile.gettempdir(), mode="tiered")
+        reply = clip_agent.respond("好的，我先看看", runtime, fake_executor, lambda *_: True)
+        self.assertIn("PYTHON[K7Q2]:", reply.notes[0])
+        brief = clip_agent.build_copilot_brief(
+            SESSION, "tiered", runtime.cwd, runtime.roots, 5, 60, 8000, [],
+        )
+        reply = clip_agent.respond(brief, runtime, fake_executor, lambda *_: True)
+        self.assertIsNone(reply.payload)
+        self.assertIn("Copilot", reply.notes[0])
+        self.assertEqual(runtime.audit.records, [])
+
+
+class SessionTests(unittest.TestCase):
+    def test_open_and_close_record_front_end_and_brief(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve()
+            args = clip_agent.build_parser().parse_args(["--workdir", str(root), "--mode", "tiered"])
+            audit = MemoryAudit()
+            front_end = Path(clip_agent.__file__).resolve()
+            previous = os.getcwd()
+            try:
+                runtime, script_hash = clip_agent.open_session(args, [root], audit, "window", front_end)
+            finally:
+                os.chdir(previous)
+            start = audit.records[0]
+            self.assertEqual(start["event"], "startup")
+            self.assertEqual(start["input"], "window")
+            self.assertEqual(start["script_sha256"], script_hash)
+            self.assertEqual(start["front_end_sha256"], clip_agent.sha256_file(front_end))
+            self.assertEqual(start["policy"]["mode"], "tiered")
+            self.assertIn("PYTHON[%s]:" % runtime.session, runtime.brief)
+            self.assertEqual(runtime.cwd, root)
+            clip_agent.close_session(runtime, "closed")
+            self.assertEqual(audit.records[-1]["event"], "shutdown")
+            self.assertEqual(audit.records[-1]["decision"], "closed")
 
 
 class WorkdirTests(unittest.TestCase):
@@ -941,6 +1149,31 @@ class DocTests(unittest.TestCase):
         self.assertIn("[RESULT #编号]", text)
         self.assertIn("BLOCKED", text)
         self.assertNotIn("{{SESSION}}", text)
+
+    def test_brief_sets_reply_format_and_its_examples_parse(self):
+        root = Path(tempfile.gettempdir()).resolve()
+        briefs = {
+            mode: clip_agent.build_copilot_brief(SESSION, mode, root, [root], 5, 60, 8000, [], ["pandas"])
+            for mode in ("readonly", "tiered")
+        }
+        for mode, text in briefs.items():
+            with self.subTest(mode=mode):
+                self.assertIn("已就绪，请告诉我任务", text)
+                self.assertIn("DONE:", text)
+                self.assertLess(len(text), 4000)
+                blocks = [
+                    block for block in re.findall(r"```text\n(.*?)```", text, re.S)
+                    if "BEGIN OUTPUT" not in block
+                ]
+                self.assertTrue(blocks)
+                for block in blocks:
+                    directives, error = clip_agent.parse_batch(block, SESSION, 5)
+                    self.assertIsNone(error, block)
+                    self.assertTrue(directives, block)
+        self.assertIn("PYTHON[K7Q2]:", briefs["tiered"])
+        self.assertIn("END_PYTHON", briefs["tiered"])
+        self.assertIn("pandas", briefs["tiered"])
+        self.assertNotIn("PYTHON[K7Q2]:", briefs["readonly"])
 
 
 if __name__ == "__main__":
