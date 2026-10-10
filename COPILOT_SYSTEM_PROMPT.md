@@ -1,13 +1,14 @@
 # Copilot 系统提示词
 
-下面这段就是程序内置的提示词，`{{SESSION}}` 是占位符。每次启动执行器都会生成新的会话码。
+每次启动执行器都会在程序目录写入 `COPILOT_BRIEFING.md`。把这个文件的全文贴进 Copilot 对话，作为第一条消息。里面有本次会话码、允许目录、能执行的命令名、会被拦截的写法和结果格式。
 
 ```text
-python clip_agent.py --workdir D:\你的项目 --print-prompt
 python clip_agent.py --workdir D:\你的项目 --copy-prompt
 ```
 
-`--print-prompt` 把填好会话码的提示词打到标准输出，`--copy-prompt` 把它写入剪贴板（同样不进剪贴板历史、不同步云端）。会话码必须和当前这次运行的控制台一致，所以要在同一次启动里生成，不要把上一次的提示词留到下一次用。
+`--copy-prompt` 把同一份说明写入剪贴板。`--print-prompt` 打到标准输出。会话码只对这一次运行有效。
+
+下面是说明里会带上的行为约束。`{{SESSION}}` 在生成 `COPILOT_BRIEFING.md` 时换成真实会话码。
 
 ---
 

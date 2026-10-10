@@ -783,6 +783,21 @@ class DocTests(unittest.TestCase):
         text = Path(__file__).with_name("COPILOT_SYSTEM_PROMPT.md").read_text(encoding="utf-8")
         self.assertIn(clip_agent.SYSTEM_PROMPT.strip(), text)
         self.assertIn("{{SESSION}}", text)
+        self.assertIn("COPILOT_BRIEFING.md", text)
+
+    def test_brief_contains_runtime_facts_and_exact_grammar(self):
+        text = clip_agent.build_copilot_brief(
+            "K7Q2", "readonly", Path(r"D:\work"), [Path(r"D:\work")], 5, 60, 8000, [],
+        )
+        self.assertIn("会话码：`K7Q2`", text)
+        self.assertIn(r"D:\work", text)
+        self.assertIn("TOOL[K7Q2]: Get-ChildItem -Name", text)
+        self.assertIn("READ_FILE[K7Q2]: result:1#L81-160", text)
+        self.assertIn("`get-childitem`", text)
+        self.assertIn("`status`", text)
+        self.assertIn("[RESULT #编号]", text)
+        self.assertIn("BLOCKED", text)
+        self.assertNotIn("{{SESSION}}", text)
 
 
 if __name__ == "__main__":
