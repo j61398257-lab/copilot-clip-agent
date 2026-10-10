@@ -2,3 +2,4 @@ logs/
 __pycache__/
 *.pyc
 COPILOT_BRIEFING.md
+last_workdir.txt

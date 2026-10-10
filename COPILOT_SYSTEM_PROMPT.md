@@ -1,12 +1,14 @@
 # Copilot 系统提示词
 
-每次启动执行器都会在程序目录写入 `COPILOT_BRIEFING.md`。把这个文件的全文贴进 Copilot 对话，作为第一条消息。里面有本次会话码、允许目录、能执行的命令名、会被拦截的写法和结果格式。
+每次启动执行器都会生成一份本会话说明，自动复制到剪贴板，同时写入程序目录下的 `COPILOT_BRIEFING.md`。把它贴进 Copilot 对话，作为第一条消息。里面有本次会话码、允许目录、能执行的命令名、会被拦截的写法和结果格式。
+
+双击 `启动执行器.cmd` 即可启动。第一次输入项目目录，之后直接回车沿用上次的目录。也可以用命令行：
 
 ```text
-python clip_agent.py --workdir D:\你的项目 --copy-prompt
+python clip_agent.py --workdir D:\你的项目
 ```
 
-`--copy-prompt` 把同一份说明写入剪贴板。`--print-prompt` 打到标准输出。会话码只对这一次运行有效。
+在执行器里输入“说明”可以重新复制这份说明。`--print-prompt` 把它打到标准输出。会话码只对这一次运行有效，执行器重启后要把新的说明再贴给 Copilot。
 
 下面是说明里会带上的行为约束。`{{SESSION}}` 在生成 `COPILOT_BRIEFING.md` 时换成真实会话码。
 

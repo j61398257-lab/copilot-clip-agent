@@ -103,6 +103,30 @@ class ParseTests(unittest.TestCase):
         self.assertIsNone(text)
         self.assertEqual(runtime.audit.records, [])
 
+    def test_reads_directives_the_way_copilot_formats_them(self):
+        text = "\n".join([
+            "下面先看目录和说明文件：",
+            "READ_FILE 会返回带行号的内容。",
+            "```powershell",
+            "1. TOOL[K7Q2]: Get-ChildItem -Name",
+            "- `READ_FILE[K7Q2]: README.md#L1-20`",
+            "2、TOOL[k7q2]: git status --short",
+            "> TOOL [K7Q2]: Get-Location",
+            "```",
+            "看完结果再决定下一步。",
+        ])
+        directives, error = clip_agent.parse_batch(text, SESSION, 5)
+        self.assertIsNone(error)
+        self.assertEqual(
+            [(item.kind, item.body) for item in directives],
+            [
+                ("TOOL", "Get-ChildItem -Name"),
+                ("READ_FILE", "README.md#L1-20"),
+                ("TOOL", "git status --short"),
+                ("TOOL", "Get-Location"),
+            ],
+        )
+
     def test_read_spec_range(self):
         spec = clip_agent.parse_read_spec(r"result:3#L10-20")
         self.assertEqual(spec["type"], "result")
@@ -265,6 +289,88 @@ class BatchAndConfirmTests(unittest.TestCase):
         self.assertFalse(clip_agent.wait_for_input(lambda: False, pause, now, 1))
         clock["t"] = 0
         self.assertTrue(clip_agent.wait_for_input(lambda: True, pause, now, 1))
+
+
+class ConsoleTests(unittest.TestCase):
+    def feed(self, rows, runtime):
+        written = []
+        said = io.StringIO()
+        with redirect_stderr(said):
+            action = clip_agent.consume_rows(
+                rows, runtime, fake_executor, lambda *_: True,
+                lambda text: written.append(text) or 1, False, None, 120,
+            )
+        return action, written, said.getvalue()
+
+    def test_non_directive_input_says_what_to_paste(self):
+        runtime = make_runtime(tempfile.gettempdir())
+        _, written, said = self.feed(["python clip_agent.py --verify-audit logs\\a.jsonl"], runtime)
+        self.assertEqual(written, [])
+        self.assertIn("TOOL[K7Q2]:", said)
+        self.assertIn("exit", said)
+
+    def test_pasted_brief_is_not_run_and_clipboard_untouched(self):
+        runtime = make_runtime(tempfile.gettempdir())
+        brief = clip_agent.build_copilot_brief(
+            SESSION, "readonly", runtime.cwd, runtime.roots, 5, 60, 8000, [],
+        )
+        _, written, said = self.feed(brief.splitlines(), runtime)
+        self.assertEqual(written, [])
+        self.assertEqual(runtime.audit.records, [])
+        self.assertIn("Copilot", said)
+
+    def test_brief_word_copies_brief_again(self):
+        runtime = make_runtime(tempfile.gettempdir())
+        runtime.brief = "# 本会话执行说明\n会话码：`K7Q2`"
+        action, written, _ = self.feed(["说明"], runtime)
+        self.assertIsNone(action)
+        self.assertEqual(written, [runtime.brief])
+        self.assertEqual(runtime.audit.records, [])
+
+    def test_wrong_session_points_to_brief_word(self):
+        runtime = make_runtime(tempfile.gettempdir())
+        _, written, said = self.feed(["TOOL[ZZZZ]: Get-Location"], runtime)
+        self.assertIn("[REJECTED]", written[0])
+        self.assertIn("说明", said)
+
+
+class WorkdirTests(unittest.TestCase):
+    def ask(self, answers, saved):
+        pending = list(answers)
+        shown = []
+        chosen = clip_agent.ask_workdir(lambda: pending.pop(0) if pending else "", shown.append, saved)
+        return chosen, "".join(shown)
+
+    def test_enter_reuses_saved_dir_and_pasted_quotes_are_dropped(self):
+        with tempfile.TemporaryDirectory() as directory:
+            work = Path(directory) / "proj"
+            work.mkdir()
+            chosen, shown = self.ask(["\n"], str(work))
+            self.assertEqual(chosen, str(work))
+            self.assertIn(str(work), shown)
+            chosen, _ = self.ask(['"%s"\n' % work], None)
+            self.assertEqual(chosen, str(work))
+
+    def test_bad_dir_asks_again_and_end_of_input_gives_up(self):
+        with tempfile.TemporaryDirectory() as directory:
+            chosen, shown = self.ask([os.environ["SystemDrive"] + "\\\n", directory + "\n"], None)
+            self.assertEqual(chosen, directory)
+            self.assertIn("盘符根", shown)
+        chosen, _ = self.ask(["\n"], None)
+        self.assertIsNone(chosen)
+        chosen, _ = self.ask(["exit\n"], None)
+        self.assertIsNone(chosen)
+
+    def test_saved_dir_round_trip_skips_missing_dir(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = Path(directory) / "last_workdir.txt"
+            self.assertIsNone(clip_agent.load_saved_workdir(store))
+            work = Path(directory) / "proj"
+            work.mkdir()
+            clip_agent.save_workdir(store, work)
+            self.assertEqual(clip_agent.load_saved_workdir(store), str(work))
+            work.rmdir()
+            self.assertIsNone(clip_agent.load_saved_workdir(store))
 
 
 class ProtectionTests(unittest.TestCase):
@@ -735,6 +841,36 @@ class EndToEndTests(unittest.TestCase):
             self.assertIn('"decision":"allow"', audit)
             self.assertIn("递归删除", audit)
             self.assertIn('"decision":"reject"', audit)
+
+    def test_brief_is_copied_at_start_and_on_request(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "work"
+            root.mkdir()
+            log_dir = Path(directory) / "logs"
+            agent = RunningAgent(self.agent_args(root, log_dir) + ["--copy-prompt"])
+            try:
+                code = agent.wait_session()
+                expected = "会话码：`%s`" % code
+                deadline = time.time() + 10
+                while time.time() < deadline and expected not in read_clipboard_text():
+                    time.sleep(0.1)
+                self.assertIn(clip_agent.BRIEF_TITLE, read_clipboard_text())
+                self.assertIn(expected, read_clipboard_text())
+                clip_agent.clipboard_write("别的内容")
+                agent.send("说明\n\n")
+                deadline = time.time() + 10
+                while time.time() < deadline and expected not in read_clipboard_text():
+                    time.sleep(0.1)
+                self.assertIn(expected, read_clipboard_text())
+                self.assertEqual(agent.finish(), 0)
+            finally:
+                if agent.process.poll() is None:
+                    agent.process.kill()
+                    agent.process.wait(5)
+                agent.close_pipes()
+            said = agent.stderr.decode("utf-8", "replace")
+            self.assertIn("已复制到剪贴板", said)
+            self.assertNotIn("按回车开始", said)
 
     def test_single_instance_and_timed_clear(self):
         with tempfile.TemporaryDirectory() as directory:
