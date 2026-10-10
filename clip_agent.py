@@ -2175,12 +2175,20 @@ def next_steps(brief_path: Path, copied: bool) -> str:
     )
 
 
+def accepted_start(answer: str) -> bool:
+    return answer.strip().upper() == "YES"
+
+
 def confirm_start(mode: str) -> bool:
     if mode != "tiered":
         return True
-    print("分级模式会在白名单之外逐条确认。输入 YES 继续：", file=sys.stderr, flush=True)
-    if sys.stdin.readline().strip() != "YES":
-        print("未确认，已退出。", file=sys.stderr, flush=True)
+    print("分级模式会在白名单之外逐条确认。输入 yes 继续（大小写都可以）：", file=sys.stderr, flush=True)
+    try:
+        answer = sys.stdin.readline()
+    except KeyboardInterrupt:
+        answer = ""
+    if not accepted_start(answer):
+        print("未确认，已退出。请输入 yes 再回车。", file=sys.stderr, flush=True)
         return False
     return True
 

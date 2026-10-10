@@ -245,6 +245,13 @@ class BatchAndConfirmTests(unittest.TestCase):
         self.assertIn("未得到确认", rendered)
         self.assertIn("SKIP", rendered.upper())
 
+    def test_tiered_start_accepts_either_case(self):
+        self.assertTrue(clip_agent.accepted_start("YES\n"))
+        self.assertTrue(clip_agent.accepted_start("yes\n"))
+        self.assertTrue(clip_agent.accepted_start(" Yes \n"))
+        self.assertFalse(clip_agent.accepted_start("y\n"))
+        self.assertFalse(clip_agent.accepted_start("\n"))
+
     def test_confirm_flushes_before_read(self):
         seen = {}
 
