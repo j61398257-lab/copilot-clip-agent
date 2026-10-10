@@ -778,5 +778,12 @@ class EndToEndTests(unittest.TestCase):
                 agent.close_pipes()
 
 
+class DocTests(unittest.TestCase):
+    def test_prompt_file_matches_builtin_template(self):
+        text = Path(__file__).with_name("COPILOT_SYSTEM_PROMPT.md").read_text(encoding="utf-8")
+        self.assertIn(clip_agent.SYSTEM_PROMPT.strip(), text)
+        self.assertIn("{{SESSION}}", text)
+
+
 if __name__ == "__main__":
     unittest.main()
