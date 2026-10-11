@@ -47,8 +47,13 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 $ZipHash = (Get-FileHash $Zip -Algorithm SHA256).Hash.ToLower()
 $SumsDir = Join-Path $Repo "deps"
 New-Item -ItemType Directory -Force -Path $SumsDir | Out-Null
-$Sums = "$ZipHash  docs-deps-win64.zip`n# python $(($Included -join ','))`n"
-[System.IO.File]::WriteAllText((Join-Path $SumsDir "SHA256SUMS"), $Sums, [System.Text.UTF8Encoding]::new($false))
+$SumsPath = Join-Path $SumsDir "SHA256SUMS"
+$Keep = @()
+if (Test-Path $SumsPath) {
+    $Keep = @(Get-Content $SumsPath -Encoding UTF8 | Where-Object { $_ -and $_ -notmatch "docs-deps-win64\.zip" -and $_ -notmatch "^# python" })
+}
+$Sums = ((@("$ZipHash  docs-deps-win64.zip", "# python $(($Included -join ','))") + $Keep) -join "`n") + "`n"
+[System.IO.File]::WriteAllText($SumsPath, $Sums, [System.Text.UTF8Encoding]::new($false))
 Write-Host "zip $Zip"
 Write-Host "sha256 $ZipHash"
 Write-Host "python $($Included -join ',')"
