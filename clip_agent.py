@@ -17,9 +17,11 @@ import os
 import queue
 import re
 import secrets
+import shutil
 import sqlite3
 import struct
 import subprocess
+import zipfile
 import sys
 import textwrap
 import threading
@@ -1254,7 +1256,16 @@ def parse_read_spec(body: str) -> dict | None:
     return {"type": "path", "path": text, "start": start, "end": end}
 
 
-def classify_read(body: str, mode: str, cwd: Path, roots: list[Path]) -> tuple[str, str]:
+def _is_attached(token: str, cwd: Path, attached: set | None) -> bool:
+    if not attached:
+        return False
+    try:
+        return outline_target(token, cwd) in attached
+    except OSError:
+        return False
+
+
+def classify_read(body: str, mode: str, cwd: Path, roots: list[Path], attached: set | None = None) -> tuple[str, str]:
     spec = parse_read_spec(body)
     if spec is None:
         return "block", "READ_FILE 缺少路径"
@@ -1266,8 +1277,8 @@ def classify_read(body: str, mode: str, cwd: Path, roots: list[Path]) -> tuple[s
     if mentions_sensitive(path):
         return "block", "敏感文件"
     ok, why = check_path(path, cwd, roots)
-    if ok:
-        return "allow", ""
+    if ok or _is_attached(path, cwd, attached):
+        return "allow", "" if ok else "用户附加"
     if why == "敏感文件" or mode == "readonly" or why != "路径超出允许目录":
         return "block", why
     return "confirm", why
@@ -1586,6 +1597,8 @@ class Runtime:
     step: int = 0
     brief: str = ""
     docs: DocCache = field(default_factory=DocCache)
+    attached: set = field(default_factory=set)
+    part_chars: int = 8000
 
 
 def short_command(text: str) -> str:
@@ -1658,15 +1671,15 @@ def run_directives(directives: list[Directive], rt: Runtime, executor, confirm) 
         elif directive.kind == "PYTHON":
             decision, reason = classify_python(directive.body, rt.mode)
         elif directive.kind == "OUTLINE":
-            decision, reason = classify_outline(directive.body, rt.cwd, rt.roots)
+            decision, reason = classify_outline(directive.body, rt.cwd, rt.roots, rt.attached)
         elif directive.kind == "FIND":
-            decision, reason = classify_find(directive.body, rt.cwd, rt.roots)
+            decision, reason = classify_find(directive.body, rt.cwd, rt.roots, rt.attached)
         elif directive.kind == "TABLE":
-            decision, reason = classify_table(directive.body, rt.cwd, rt.roots)
+            decision, reason = classify_table(directive.body, rt.cwd, rt.roots, rt.attached)
         elif directive.kind == "CODE":
             decision, reason = classify_code(directive.body, rt.cwd)
         else:
-            decision, reason = classify_read(directive.body, rt.mode, rt.cwd, rt.roots)
+            decision, reason = classify_read(directive.body, rt.mode, rt.cwd, rt.roots, rt.attached)
         if decision == "confirm":
             # 确认读取的是提示出现之后的新输入。同一次粘贴里的内容已经读完，不能当作同意。
             if not confirm(logged, reason):
@@ -2238,10 +2251,12 @@ def outline_target(body: str, cwd: Path) -> Path:
     return candidate.resolve()
 
 
-def classify_outline(body: str, cwd: Path, roots: list[Path]) -> tuple[str, str]:
+def classify_outline(body: str, cwd: Path, roots: list[Path], attached: set | None = None) -> tuple[str, str]:
     token = body.strip().strip("\"'") or "."
     ok, why = check_path(token, cwd, roots)
     if not ok:
+        if _is_attached(token, cwd, attached):
+            return "allow", "用户附加"
         return "block", why
     try:
         found = outline_target(token, cwd).exists()
@@ -2720,13 +2735,13 @@ def parse_find(body: str) -> tuple[list[str], str] | None:
     return terms, path.strip().strip("\"'")
 
 
-def classify_find(body: str, cwd: Path, roots: list[Path]) -> tuple[str, str]:
+def classify_find(body: str, cwd: Path, roots: list[Path], attached: set | None = None) -> tuple[str, str]:
     parsed = parse_find(body)
     if not parsed:
         return "block", "FIND 缺少关键词"
     if not parsed[1]:
         return "allow", "只读检索"
-    return classify_outline(parsed[1], cwd, roots)
+    return classify_outline(parsed[1], cwd, roots, attached)
 
 
 def search_hits(text: str, terms: list[str]) -> list[tuple[int, str, str, str, str]]:
@@ -3148,11 +3163,11 @@ def parse_table(body: str) -> tuple[str, str, str, str] | None:
     return path, sheet, span, sql.strip()
 
 
-def classify_table(body: str, cwd: Path, roots: list[Path]) -> tuple[str, str]:
+def classify_table(body: str, cwd: Path, roots: list[Path], attached: set | None = None) -> tuple[str, str]:
     parsed = parse_table(body)
     if not parsed:
         return "block", "TABLE 需要“文件 | SELECT …”"
-    return classify_outline(parsed[0], cwd, roots)
+    return classify_outline(parsed[0], cwd, roots, attached)
 
 
 def table_result(directive: Directive, rt: Runtime, started: float) -> ExecResult:
@@ -3393,8 +3408,9 @@ def real_execute(directive: Directive, rt: Runtime) -> ExecResult:
         return excel_region_result(spec, rt, started)
     if Path(spec["path"]).suffix.lower() in EXCEL_EXTS and spec["start"] is None:
         return outline_result(Directive("OUTLINE", spec["path"], directive.raw), rt, started)
+    outside = directive.confirmed or outline_target(spec["path"], rt.cwd) in rt.attached
     text, error = load_file(
-        spec["path"], rt.cwd, rt.roots, allow_outside=directive.confirmed,
+        spec["path"], rt.cwd, rt.roots, allow_outside=outside,
         cache=rt.docs, timeout=rt.timeout,
     )
     if error:
@@ -3965,8 +3981,229 @@ def confirm_start(mode: str) -> bool:
     return True
 
 
+UPLOAD_ROOT: Path | None = None
+
+
+def upload_root() -> Path:
+    return UPLOAD_ROOT if UPLOAD_ROOT is not None else TOOL_DIR / "upload"
+
+
+def session_upload(session: str) -> Path:
+    return upload_root() / session
+
+
+def clear_uploads(session: str | None = None) -> None:
+    root = upload_root()
+    if session:
+        shutil.rmtree(root / session, ignore_errors=True)
+        return
+    if not root.exists():
+        return
+    for child in list(root.iterdir()):
+        shutil.rmtree(child, ignore_errors=True)
+
+
+def safe_stem(name: str) -> str:
+    cleaned = re.sub(r'[<>:"/\\|?*]', "", Path(name).stem).strip().strip(".")
+    return (cleaned or "资料")[:40]
+
+
+def split_document(text: str, limit: int) -> list[str]:
+    lines = text.splitlines()
+    if not lines:
+        return [""]
+    return ["\n".join(lines[start - 1:end]) for start, end in split_sections(lines, limit)]
+
+
+def docx_has_hidden_text(path: Path) -> bool:
+    if path.suffix.lower() != ".docx":
+        return False
+    try:
+        with zipfile.ZipFile(path) as archive:
+            xml = archive.read("word/document.xml")
+    except (OSError, KeyError, zipfile.BadZipFile):
+        return False
+    return b"w:vanish" in xml
+
+
+def source_text(path: Path, rt: Runtime) -> tuple[str | None, str]:
+    if path_is_sensitive(path) or mentions_sensitive(path.name):
+        return None, "敏感文件，已拒绝"
+    suffix = path.suffix.lower()
+    if suffix in {".doc", ".ppt"}:
+        return None, "旧格式，请直接上传原文件"
+    if suffix in {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tif", ".tiff"}:
+        return None, "图片请直接上传原文件"
+    allow = path.resolve() in rt.attached or inside_any(path.resolve(), rt.roots)
+    if suffix in DOC_EXTS:
+        text, error = load_file(str(path), rt.cwd, rt.roots, allow_outside=allow, cache=rt.docs, timeout=rt.timeout)
+        if error:
+            return None, error
+        return text, ""
+    if suffix in EXCEL_EXTS:
+        try:
+            book = load_excel_book(path, rt.timeout)
+        except DocumentError as exc:
+            return None, str(exc)
+        sheets = [(item["name"], item["rows"]) for item in book.get("sheets", [])]
+        return format_workbook(sheets, int(book.get("hidden") or 0)), ""
+    try:
+        data = path.read_bytes()
+    except OSError:
+        return None, "无法读取"
+    if b"\x00" in data and not data.startswith((b"\xff\xfe", b"\xfe\xff")):
+        return None, "二进制文件，请直接上传原文件"
+    return decode_file_bytes(data), ""
+
+
+@dataclass
+class PackPart:
+    name: str
+    body: str
+    source: str
+
+
+@dataclass
+class UploadPack:
+    folder: Path | None
+    message: str
+    parts: list
+    skipped: list
+
+
+def _part_banner(source: str, index: int, total: int, body: str, previous: str) -> str:
+    lines = body.splitlines()
+    titles = [info[1] for line in lines if (info := heading_info(line))]
+    rows = ["来源：%s" % source, "第 %d 份，共 %d 份" % (index, total)]
+    if titles:
+        rows.append("章节：" + (titles[0] if len(titles) == 1 else "%s ~ %s" % (titles[0], titles[-1])))
+    pages = _section_pages(lines, 1, len(lines))
+    if pages:
+        rows.append(pages)
+    if previous and (not titles or titles[0] != previous):
+        rows.append("接上一份：%s" % previous)
+    return "\n".join(rows)
+
+
+def code_context(task: str, rt: Runtime) -> str:
+    if (rt.cwd / ".codegraph").is_dir() and find_codegraph() is not None:
+        node, entry = find_codegraph()
+        proc = run_codegraph(codegraph_argv(node, entry, "context", task.strip()[:500] or "项目结构", rt.cwd), rt.cwd, max(rt.timeout, 30))
+        if proc.text.strip():
+            return proc.text
+    return project_outline(rt.cwd, rt.roots)
+
+
+def build_upload_pack(task: str, files: list, with_code: bool, rt: Runtime) -> UploadPack:
+    folder = session_upload(rt.session)
+    shutil.rmtree(folder, ignore_errors=True)
+    folder.mkdir(parents=True)
+    parts: list[PackPart] = []
+    skipped: list[str] = []
+    catalog_groups: list[str] = []
+    source_index = 1
+    for raw in files:
+        path = Path(raw)
+        if not path.is_absolute():
+            path = (rt.cwd / path).resolve()
+        text, reason = source_text(path, rt)
+        if text is None:
+            skipped.append("%s：%s" % (path.name, reason))
+            continue
+        if find_marker(text, rt.markers):
+            skipped.append("%s：命中密级标识，未导出" % path.name)
+            continue
+        bodies = split_document(text, rt.part_chars)
+        stem = safe_stem(path.name)
+        previous = ""
+        redactions = 0
+        listed = []
+        hidden_note = "检测到隐藏文字。" if docx_has_hidden_text(path) else ""
+        for index, body in enumerate(bodies, 1):
+            banner = _part_banner(path.name, index, len(bodies), body, previous)
+            titles = [info[1] for line in body.splitlines() if (info := heading_info(line))]
+            if titles:
+                previous = titles[-1]
+            visible, count = redact(banner + "\n\n" + body)
+            redactions += count
+            filename = "%02d_%s_%d.md" % (source_index, stem, index)
+            (folder / filename).write_text(visible, encoding="utf-8")
+            parts.append(PackPart(filename, body, path.name))
+            label = titles[0] if titles else "第 %d 份" % index
+            if len(titles) > 1:
+                label = "%s ~ %s" % (titles[0], titles[-1])
+            listed.append("- %s：%s（约 %d 字）" % (filename, label, len(body)))
+            try:
+                rt.audit.write({
+                    "event": "upload",
+                    "session": rt.session,
+                    "source": str(path),
+                    "source_sha256": sha256_file(path),
+                    "output": filename,
+                    "chars": len(body),
+                    "output_sha256": sha256_text(visible),
+                    "redactions": count,
+                })
+            except Exception:
+                pass
+        chars = sum(1 for char in text if not char.isspace())
+        extra = "，脱敏 %d 处" % redactions if redactions else ""
+        if hidden_note:
+            extra += "，" + hidden_note
+        catalog_groups.append("## %s（约 %d 字，拆成 %d 份%s）\n%s" % (
+            path.name, chars, len(bodies), extra, "\n".join(listed),
+        ))
+        source_index += 1
+    if with_code:
+        overview = code_context(task, rt)
+        bodies = split_document(overview, rt.part_chars)
+        for index, body in enumerate(bodies, 1):
+            filename = "%02d_代码概览_%d.md" % (source_index, index)
+            visible, _count = redact(body)
+            (folder / filename).write_text(visible, encoding="utf-8")
+            parts.append(PackPart(filename, body, "代码概览"))
+        catalog_groups.append("## 代码概览\n- 见 %02d_代码概览_1.md" % source_index)
+    catalog = "\n\n".join([
+        "# 上传包目录",
+        "任务：%s" % task.strip(),
+        "共 %d 份资料、%d 个文件。先读这一份，再按需要读对应文件；引用时写文件名加章节或页码。" % (
+            len(files), len(parts) + 1,
+        ),
+        *catalog_groups,
+        *([ "未导出：\n" + "\n".join("- " + item for item in skipped)] if skipped else []),
+    ])
+    visible_catalog, _count = redact(catalog)
+    (folder / "00_目录.md").write_text(visible_catalog, encoding="utf-8")
+    names = "、".join(part.name for part in parts[:8])
+    message = "%s\n\n我上传了 %d 个文件。请先读 00_目录.md，再按任务需要读其他文件。%s\n回答时注明出处：文件名加章节或页码。" % (
+        task.strip(), len(parts) + 1, names,
+    )
+    if skipped:
+        message += "\n未放入上传包：" + "；".join(skipped)
+    return UploadPack(folder, message, parts, skipped)
+
+
+def compose_task(task: str, files: list, with_code: bool, rt: Runtime) -> str:
+    task = task.strip()
+    chunks = [task]
+    for raw in files:
+        path = Path(raw)
+        if not path.is_absolute():
+            path = (rt.cwd / path).resolve()
+        rt.attached.add(path.resolve())
+        text, reason = source_text(path, rt)
+        chunks.append("## %s\n\n%s" % (path.name, text if text is not None else reason))
+    if with_code:
+        chunks.append(code_context(task, rt))
+    message = "\n\n".join(chunk for chunk in chunks if chunk)
+    if len(message) <= rt.max_chars:
+        return message
+    return build_upload_pack(task, files, with_code, rt).message
+
+
 def open_session(args, roots: list[Path], audit, input_method: str, front_end: Path | None = None) -> tuple[Runtime, str]:
     """写启动记录并生成本会话说明。调用前要先拿到单实例锁。"""
+    clear_uploads()
     session = new_session_code()
     cwd = roots[0]
     os.chdir(cwd)
@@ -3985,6 +4222,7 @@ def open_session(args, roots: list[Path], audit, input_method: str, front_end: P
         audit=audit,
         user=current_user(),
         host=current_host(),
+        part_chars=getattr(args, "part_chars", 8000),
     )
     record = {
         "ts": now_iso(),
@@ -4037,6 +4275,7 @@ def open_session(args, roots: list[Path], audit, input_method: str, front_end: P
 
 
 def close_session(rt: Runtime, reason: str) -> None:
+    clear_uploads(rt.session)
     rt.audit.write({
         "ts": now_iso(),
         "user": rt.user,

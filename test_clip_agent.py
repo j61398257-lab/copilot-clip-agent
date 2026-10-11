@@ -1654,6 +1654,82 @@ class CodeGraphTests(unittest.TestCase):
         self.assertIn("hello_clip", found.text)
 
 
+class UploadTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name).resolve()
+        self.runtime = make_runtime(self.root)
+        self.runtime.part_chars = 280
+        self.runtime.max_chars = 500
+        self.original_root = clip_agent.UPLOAD_ROOT
+        clip_agent.UPLOAD_ROOT = self.root / "upload"
+
+    def tearDown(self):
+        clip_agent.UPLOAD_ROOT = self.original_root
+        self.tmp.cleanup()
+
+    def test_parts_rebuild_the_document_and_catalog_lists_them(self):
+        chapters = []
+        for index in range(1, 5):
+            chapters.append("# 第%d章 标题%d\n\n%s" % (index, index, "正文%d" % index + "甲" * 80))
+        source = "\n\n".join(chapters) + "\n电话 13800138000"
+        (self.root / "合同.md").write_text(source, encoding="utf-8")
+        self.assertEqual("\n".join(clip_agent.split_document(source, 280)), source)
+        pack = clip_agent.build_upload_pack("审查付款", [self.root / "合同.md"], False, self.runtime)
+        self.assertEqual("\n".join(part.body for part in pack.parts), source)
+        titles = []
+        for part in pack.parts:
+            titles.extend(info[1] for line in part.body.splitlines() if (info := clip_agent.heading_info(line)))
+        self.assertEqual(titles.count("第1章 标题1"), 1)
+        self.assertEqual(titles.count("第4章 标题4"), 1)
+        catalog = (pack.folder / "00_目录.md").read_text(encoding="utf-8")
+        for part in pack.parts:
+            self.assertIn(part.name, catalog)
+            written = (pack.folder / part.name).read_text(encoding="utf-8")
+            self.assertNotIn("13800138000", written)
+        self.assertIn("脱敏", catalog)
+        self.assertIn("00_目录.md", pack.message)
+
+    def test_marker_file_is_not_exported_and_session_cleans_up(self):
+        (self.root / "密.md").write_text("TOP SECRET\n不能导出的正文\n", encoding="utf-8")
+        self.runtime.markers = ["TOP SECRET"]
+        pack = clip_agent.build_upload_pack("看资料", [self.root / "密.md"], False, self.runtime)
+        self.assertEqual(pack.parts, [])
+        self.assertIn("密级", pack.message)
+        self.assertFalse(any("不能导出" in path.read_text(encoding="utf-8") for path in pack.folder.glob("*.md")))
+        folder = pack.folder
+        self.assertTrue(folder.is_dir())
+        clip_agent.close_session(self.runtime, "closed")
+        self.assertFalse(folder.exists())
+        leftover = clip_agent.upload_root() / "OLD"
+        leftover.mkdir(parents=True)
+        (leftover / "残留.md").write_text("x", encoding="utf-8")
+        clip_agent.clear_uploads()
+        self.assertFalse(leftover.exists())
+
+    def test_short_task_stays_inline_and_attached_file_can_be_read(self):
+        (self.root / "短.txt").write_text("只有一句。", encoding="utf-8")
+        self.runtime.max_chars = 4000
+        message = clip_agent.compose_task("看这句", [self.root / "短.txt"], False, self.runtime)
+        self.assertIn("只有一句", message)
+        self.assertFalse(clip_agent.session_upload(self.runtime.session).exists())
+        outside = self.root.parent / "外面.txt"
+        outside.write_text("外部内容", encoding="utf-8")
+        self.runtime.attached.add(outside.resolve())
+        rendered = clip_agent.handle_text(
+            "READ_FILE[K7Q2]: %s" % outside,
+            self.runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        self.assertIn("外部内容", rendered)
+        other = self.root.parent / "别的.txt"
+        other.write_text("不该读到", encoding="utf-8")
+        blocked = clip_agent.handle_text(
+            "READ_FILE[K7Q2]: %s" % other,
+            self.runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        self.assertNotIn("不该读到", blocked)
+
+
 class DocTests(unittest.TestCase):
     def test_prompt_file_matches_builtin_template(self):
         text = Path(__file__).with_name("COPILOT_SYSTEM_PROMPT.md").read_text(encoding="utf-8")
