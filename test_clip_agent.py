@@ -1551,6 +1551,109 @@ class OfficeIntegrationTests(unittest.TestCase):
         self.assertIn("30", table)
 
 
+class CodeGraphTests(unittest.TestCase):
+    def _bundle(self, folder: Path) -> None:
+        (folder / "lib" / "dist" / "bin").mkdir(parents=True)
+        (folder / "node.exe").write_bytes(b"MZ")
+        (folder / "lib" / "dist" / "bin" / "codegraph.js").write_text("entry", encoding="utf-8")
+
+    def test_find_order_uses_explicit_then_program_dir(self):
+        tmp = Path(tempfile.mkdtemp())
+        explicit = tmp / "explicit"
+        tool = tmp / "app"
+        npm = tmp / "npm"
+        self._bundle(explicit)
+        self._bundle(tool / "tools" / "codegraph")
+        self._bundle(npm / "node_modules" / "@colbymchenry" / "codegraph-win32-x64")
+        found = clip_agent.find_codegraph(explicit, tool, npm)
+        self.assertEqual(found[0], explicit / "node.exe")
+        found = clip_agent.find_codegraph(None, tool, npm)
+        self.assertEqual(found[0], (tool / "tools" / "codegraph" / "node.exe"))
+        (tool / "tools" / "codegraph" / "node.exe").unlink()
+        found = clip_agent.find_codegraph(None, tool, npm)
+        self.assertIn("codegraph-win32-x64", str(found[0]))
+        self.assertIsNone(clip_agent.find_codegraph(None, tmp / "empty", None))
+
+    def test_argv_is_fixed_and_download_stays_off(self):
+        node, entry = Path("node.exe"), Path("codegraph.js")
+        argv = clip_agent.codegraph_argv(node, entry, "search", "load_orders", Path("proj"))
+        self.assertEqual(argv[1], "--liftoff-only")
+        self.assertEqual(argv[argv.index("query") + 1], "load_orders")
+        self.assertNotIn("-rf", argv)
+        fresh = clip_agent.codegraph_index_argv(node, entry, Path("proj"), False)
+        self.assertIn("init", fresh)
+        self.assertIn("-i", fresh)
+        again = clip_agent.codegraph_index_argv(node, entry, Path("proj"), True)
+        self.assertIn("sync", again)
+        self.assertNotIn("-i", again)
+        seen = {}
+        original = clip_agent.run_process
+
+        def fake(argv, cwd, timeout, **kwargs):
+            seen["env"] = kwargs["env"]
+            return clip_agent.ProcResult(0, "ok", "ok", False)
+
+        clip_agent.run_process = fake
+        try:
+            clip_agent.run_codegraph(["node"], Path("."), 5)
+        finally:
+            clip_agent.run_process = original
+        self.assertEqual(seen["env"]["CODEGRAPH_NO_DOWNLOAD"], "1")
+        self.assertEqual(seen["env"]["CODEGRAPH_NO_DAEMON"], "1")
+
+    def test_code_directive_guards(self):
+        tmp = Path(tempfile.mkdtemp())
+        root = tmp / "work"
+        root.mkdir()
+        runtime = make_runtime(root)
+        original_find = clip_agent.find_codegraph
+        original_run = clip_agent.run_codegraph
+        try:
+            clip_agent.find_codegraph = lambda *args, **kwargs: None
+            missing = clip_agent.handle_text(
+                "CODE[K7Q2]: search hello", runtime, clip_agent.real_execute, lambda *_: False,
+            )
+            self.assertIn("未安装", missing)
+            clip_agent.find_codegraph = lambda *args, **kwargs: (Path("node.exe"), Path("codegraph.js"))
+            bad = clip_agent.handle_text(
+                "CODE[K7Q2]: context -rf", runtime, clip_agent.real_execute, lambda *_: False,
+            )
+            self.assertIn("不能以 -", bad)
+            no_index = clip_agent.handle_text(
+                "CODE[K7Q2]: search hello", runtime, clip_agent.real_execute, lambda *_: False,
+            )
+            self.assertIn("建立代码索引", no_index)
+            self.assertIn("OUTLINE", no_index)
+            calls = []
+
+            def fake_run(argv, cwd, timeout):
+                calls.append(list(argv))
+                return clip_agent.ProcResult(0, "符号 hello", "符号 hello", False)
+
+            (root / ".codegraph").mkdir()
+            clip_agent.run_codegraph = fake_run
+            done = clip_agent.handle_text(
+                "CODE[K7Q2]: search hello", runtime, clip_agent.real_execute, lambda *_: False,
+            )
+            self.assertIn("符号 hello", done)
+            self.assertEqual(calls[0][calls[0].index("query") + 1], "hello")
+        finally:
+            clip_agent.find_codegraph = original_find
+            clip_agent.run_codegraph = original_run
+
+    def test_index_and_query_when_installed(self):
+        if clip_agent.find_codegraph() is None:
+            self.skipTest("未安装 CodeGraph")
+        tmp = Path(tempfile.mkdtemp())
+        (tmp / "app.py").write_text("def hello_clip():\n    return 1\n", encoding="utf-8")
+        node, entry = clip_agent.find_codegraph()
+        indexed = clip_agent.run_codegraph(clip_agent.codegraph_index_argv(node, entry, tmp, False), tmp, 90)
+        self.assertEqual(indexed.exit_code, 0, indexed.text[-400:])
+        self.assertTrue((tmp / ".codegraph").is_dir())
+        found = clip_agent.run_codegraph(clip_agent.codegraph_argv(node, entry, "search", "hello_clip", tmp), tmp, 30)
+        self.assertIn("hello_clip", found.text)
+
+
 class DocTests(unittest.TestCase):
     def test_prompt_file_matches_builtin_template(self):
         text = Path(__file__).with_name("COPILOT_SYSTEM_PROMPT.md").read_text(encoding="utf-8")

@@ -150,11 +150,12 @@ DEFAULT_MARKERS = (
 BIDI = set(range(0x202A, 0x202F)) | set(range(0x2066, 0x206A)) | {0x200E, 0x200F}
 ZERO_WIDTH = dict.fromkeys(map(ord, "\u200b\u200c\u200d\u2060\ufeff"), None)
 ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
-LOOSE_RE = re.compile(r"^(TOOL|READ_FILE|OUTLINE|FIND|TABLE|PYTHON)\s*[\[:]", re.IGNORECASE)
+LOOSE_RE = re.compile(r"^(TOOL|READ_FILE|OUTLINE|FIND|TABLE|CODE|PYTHON)\s*[\[:]", re.IGNORECASE)
 STRICT_RE = re.compile(
-    r"^(TOOL|READ_FILE|OUTLINE|FIND|TABLE)\s*\[([A-Za-z0-9]{4})\]\s*:\s*(.*)$",
+    r"^(TOOL|READ_FILE|OUTLINE|FIND|TABLE|CODE)\s*\[([A-Za-z0-9]{4})\]\s*:\s*(.*)$",
     re.IGNORECASE,
 )
+CODE_KINDS = ("context", "search", "callers", "callees", "impact")
 PY_START_RE = re.compile(r"^PYTHON\s*\[([A-Za-z0-9]{4})\]\s*:\s*(.*)$", re.IGNORECASE)
 PY_END_RE = re.compile(r"^END_PYTHON(?:\s*\[[A-Za-z0-9]{4}\])?$", re.IGNORECASE)
 PY_MISSING_END = "PYTHON 代码块缺少 END_PYTHON"
@@ -1662,6 +1663,8 @@ def run_directives(directives: list[Directive], rt: Runtime, executor, confirm) 
             decision, reason = classify_find(directive.body, rt.cwd, rt.roots)
         elif directive.kind == "TABLE":
             decision, reason = classify_table(directive.body, rt.cwd, rt.roots)
+        elif directive.kind == "CODE":
+            decision, reason = classify_code(directive.body, rt.cwd)
         else:
             decision, reason = classify_read(directive.body, rt.mode, rt.cwd, rt.roots)
         if decision == "confirm":
@@ -3215,6 +3218,113 @@ def task_with_outline(task: str, rt: Runtime) -> str:
     return task + "\n\n" + reply.payload if reply.payload else task
 
 
+CODEGRAPH_DIR: Path | None = None
+_NPM_UNSET = object()
+
+
+def read_npm_prefix() -> Path | None:
+    npmrc = Path.home() / ".npmrc"
+    try:
+        text = npmrc.read_text(encoding="utf-8")
+    except OSError:
+        text = ""
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.lower().startswith("prefix"):
+            _key, sep, value = stripped.partition("=")
+            value = value.strip().strip("\"'")
+            if sep and value:
+                return Path(value)
+    appdata = os.environ.get("APPDATA", "")
+    return Path(appdata) / "npm" if appdata else None
+
+
+def codegraph_bundle(folder: Path) -> tuple[Path, Path] | None:
+    node = folder / "node.exe"
+    entry = folder / "lib" / "dist" / "bin" / "codegraph.js"
+    if node.is_file() and entry.is_file():
+        return node, entry
+    return None
+
+
+def find_codegraph(
+    explicit: Path | None = None,
+    tool_dir: Path | None = None,
+    npm_prefix=_NPM_UNSET,
+) -> tuple[Path, Path] | None:
+    if explicit is None and CODEGRAPH_DIR is not None:
+        explicit = CODEGRAPH_DIR
+    folders: list[Path] = []
+    if explicit:
+        folders.append(Path(explicit))
+    folders.append((tool_dir or TOOL_DIR) / "tools" / "codegraph")
+    prefix = read_npm_prefix() if npm_prefix is _NPM_UNSET else npm_prefix
+    if prefix:
+        root = Path(prefix) / "node_modules" / "@colbymchenry"
+        folders.append(root / "codegraph" / "node_modules" / "@colbymchenry" / "codegraph-win32-x64")
+        folders.append(root / "codegraph-win32-x64")
+    for folder in folders:
+        found = codegraph_bundle(folder)
+        if found:
+            return found
+    return None
+
+
+def parse_code(body: str) -> tuple[str, str] | None:
+    kind, _sep, text = body.strip().partition(" ")
+    kind = kind.lower()
+    text = text.strip()
+    if kind not in CODE_KINDS or not text or text.startswith("-") or len(text) > 500:
+        return None
+    return kind, text
+
+
+def codegraph_argv(node: Path, entry: Path, kind: str, text: str, root: Path) -> list[str]:
+    project = str(root)
+    if kind == "context":
+        tail = ["context", text, "-p", project, "-f", "markdown", "-n", "20", "-c", "6"]
+    elif kind == "search":
+        tail = ["query", text, "-p", project, "-l", "20"]
+    elif kind == "impact":
+        tail = ["impact", text, "-p", project, "-d", "2"]
+    else:
+        tail = [kind, text, "-p", project, "-l", "20"]
+    return [str(node), "--liftoff-only", str(entry), *tail]
+
+
+def codegraph_index_argv(node: Path, entry: Path, root: Path, indexed: bool) -> list[str]:
+    if indexed:
+        return [str(node), "--liftoff-only", str(entry), "sync", str(root)]
+    return [str(node), "--liftoff-only", str(entry), "init", str(root), "-i"]
+
+
+def run_codegraph(argv: list[str], cwd: Path, timeout: int) -> ProcResult:
+    env = scrub_env(dict(os.environ))
+    env["CODEGRAPH_NO_DOWNLOAD"] = "1"
+    env["CODEGRAPH_NO_DAEMON"] = "1"
+    return run_process(argv, cwd, timeout, env=env, creationflags=subprocess.CREATE_NO_WINDOW)
+
+
+def classify_code(body: str, cwd: Path) -> tuple[str, str]:
+    if parse_code(body) is None:
+        return "block", "CODE 写法：context、search、callers、callees、impact，参数不能以 - 开头"
+    if find_codegraph() is None:
+        return "block", "未安装 CodeGraph，请改用 OUTLINE"
+    if not (cwd / ".codegraph").is_dir():
+        return "block", "请用户在窗口里点“建立代码索引”，先用 OUTLINE"
+    return "allow", "只读代码查询"
+
+
+def code_result(directive: Directive, rt: Runtime, started: float) -> ExecResult:
+    parsed = parse_code(directive.body)
+    pair = find_codegraph()
+    if parsed is None or pair is None:
+        return ExecResult(1, "CODE 无法执行", time.perf_counter() - started)
+    argv = codegraph_argv(pair[0], pair[1], parsed[0], parsed[1], rt.cwd)
+    proc = run_codegraph(argv, rt.cwd, max(rt.timeout, 30))
+    return paged_result(proc.text or "没有输出", rt, started, "代码", True)
+
+
 def excel_region_result(spec: dict, rt: Runtime, started: float) -> ExecResult:
     target = outline_target(spec["path"], rt.cwd)
     try:
@@ -3265,6 +3375,8 @@ def real_execute(directive: Directive, rt: Runtime) -> ExecResult:
         return find_result(directive, rt, started)
     if directive.kind == "TABLE":
         return table_result(directive, rt, started)
+    if directive.kind == "CODE":
+        return code_result(directive, rt, started)
     spec = parse_read_spec(directive.body)
     if spec is None:
         return ExecResult(1, "READ_FILE 缺少路径", time.perf_counter() - started)
@@ -3717,6 +3829,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--show-policy", action="store_true")
     parser.add_argument("--verify-audit", help="校验审计文件的哈希链后退出")
     parser.add_argument("--allow-piped-input", action="store_true", help="仅供测试：允许从管道读取指令")
+    parser.add_argument("--codegraph-dir", default="", help="CodeGraph 平台包目录")
+    parser.add_argument("--part-chars", type=int, default=8000, help="上传包每份大约多少字")
     return parser
 
 
@@ -3902,6 +4016,15 @@ def open_session(args, roots: list[Path], audit, input_method: str, front_end: P
             "markers": list(args.block_marker),
         },
     }
+    pair = find_codegraph()
+    if pair is not None:
+        record["policy"]["codegraph_sha256"] = sha256_file(pair[1])
+        package = pair[0].with_name("package.json")
+        if package.is_file():
+            try:
+                record["policy"]["codegraph_version"] = json.loads(package.read_text(encoding="utf-8")).get("version", "")
+            except (OSError, json.JSONDecodeError):
+                pass
     if front_end is not None:
         record["front_end_sha256"] = sha256_file(front_end)
     audit.write(record)
@@ -3936,6 +4059,8 @@ def close_session(rt: Runtime, reason: str) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    global CODEGRAPH_DIR
+    CODEGRAPH_DIR = Path(args.codegraph_dir) if args.codegraph_dir else None
     problem = validate_args(args)
     if problem:
         print(problem, file=sys.stderr)
