@@ -149,9 +149,9 @@ DEFAULT_MARKERS = (
 BIDI = set(range(0x202A, 0x202F)) | set(range(0x2066, 0x206A)) | {0x200E, 0x200F}
 ZERO_WIDTH = dict.fromkeys(map(ord, "\u200b\u200c\u200d\u2060\ufeff"), None)
 ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
-LOOSE_RE = re.compile(r"^(TOOL|READ_FILE|OUTLINE|PYTHON)\s*[\[:]", re.IGNORECASE)
+LOOSE_RE = re.compile(r"^(TOOL|READ_FILE|OUTLINE|FIND|PYTHON)\s*[\[:]", re.IGNORECASE)
 STRICT_RE = re.compile(
-    r"^(TOOL|READ_FILE|OUTLINE)\s*\[([A-Za-z0-9]{4})\]\s*:\s*(.*)$",
+    r"^(TOOL|READ_FILE|OUTLINE|FIND)\s*\[([A-Za-z0-9]{4})\]\s*:\s*(.*)$",
     re.IGNORECASE,
 )
 PY_START_RE = re.compile(r"^PYTHON\s*\[([A-Za-z0-9]{4})\]\s*:\s*(.*)$", re.IGNORECASE)
@@ -1641,6 +1641,8 @@ def run_directives(directives: list[Directive], rt: Runtime, executor, confirm) 
             decision, reason = classify_python(directive.body, rt.mode)
         elif directive.kind == "OUTLINE":
             decision, reason = classify_outline(directive.body, rt.cwd, rt.roots)
+        elif directive.kind == "FIND":
+            decision, reason = classify_find(directive.body, rt.cwd, rt.roots)
         else:
             decision, reason = classify_read(directive.body, rt.mode, rt.cwd, rt.roots)
         if decision == "confirm":
@@ -1737,7 +1739,7 @@ def reject_hint(error: str) -> str:
 
 
 def accepted_prefixes(rt: Runtime) -> str:
-    kinds = ["OUTLINE", "TOOL", "READ_FILE"] + (["PYTHON"] if rt.mode == "tiered" else [])
+    kinds = ["OUTLINE", "FIND", "TOOL", "READ_FILE"] + (["PYTHON"] if rt.mode == "tiered" else [])
     return "、".join("%s[%s]:" % (kind, rt.session) for kind in kinds)
 
 
@@ -2574,18 +2576,229 @@ def project_outline(target: Path, roots: list[Path] | None = None) -> str:
     return "\n".join(clip_line(line, 300) for line in out)
 
 
-def page_ranges(lines: list[str], page_chars: int) -> list[tuple[int, int]]:
-    # 每行另算 8 个字符，对应写回时加的行号前缀。
+_HEADING_RULES = (
+    (1, re.compile(r"^(#{1})\s+(\S.*)")),
+    (2, re.compile(r"^(#{2})\s+(\S.*)")),
+    (3, re.compile(r"^(#{3,6})\s+(\S.*)")),
+    (1, re.compile(r"^第[0-9一二三四五六七八九十百零〇]+章\s*\S*")),
+    (2, re.compile(r"^第[0-9一二三四五六七八九十百零〇]+节\s*\S*")),
+    (2, re.compile(r"^[一二三四五六七八九十]+、\S+")),
+    (3, re.compile(r"^（[一二三四五六七八九十]+）\S*")),
+    (2, re.compile(r"^\d+(?:\.\d+)+\s+\S+")),
+)
+
+
+def heading_info(line: str) -> tuple[int, str] | None:
+    text = line.strip()
+    if not text or _PAGE_MARK.match(text):
+        return None
+    for level, pattern in _HEADING_RULES:
+        matched = pattern.match(text)
+        if not matched:
+            continue
+        if text.startswith("#"):
+            title = re.sub(r"^#{1,6}\s+", "", text).strip()
+            return len(re.match(r"^#+", text).group(0)), title
+        return level, text
+    return None
+
+
+def split_sections(lines: list[str], limit: int) -> list[tuple[int, int]]:
+    # 每行另算 8 个字符，对应写回时加的行号前缀。填到七成后在标题前断开；超长章节在空行处断开。
+    if not lines:
+        return [(1, 1)]
     pages: list[tuple[int, int]] = []
-    start, used = 1, 0
-    for number, line in enumerate(lines, 1):
-        cost = len(line) + 8
-        if used and used + cost > page_chars:
-            pages.append((start, number - 1))
-            start, used = number, 0
+    start = 0
+    index = 0
+    used = 0
+    while index < len(lines):
+        cost = len(lines[index]) + 8
+        if used and heading_info(lines[index]) and used >= limit * 0.7:
+            pages.append((start + 1, index))
+            start = index
+            used = 0
+            continue
+        if used and used + cost > limit:
+            split = index
+            for cursor in range(index - 1, start, -1):
+                if heading_info(lines[cursor]):
+                    split = cursor
+                    break
+                if not lines[cursor].strip():
+                    split = cursor + 1
+                    break
+            if split <= start:
+                split = index
+            pages.append((start + 1, split))
+            start = split
+            used = 0
+            index = split
+            continue
         used += cost
-    pages.append((start, max(start, len(lines))))
-    return pages
+        index += 1
+    if start < len(lines):
+        pages.append((start + 1, len(lines)))
+    return pages or [(1, len(lines))]
+
+
+def page_ranges(lines: list[str], page_chars: int) -> list[tuple[int, int]]:
+    return split_sections(lines, page_chars)
+
+
+def _section_pages(lines: list[str], start: int, end: int) -> str:
+    current = None
+    seen: list[int] = []
+    for number, line in enumerate(lines, 1):
+        matched = _PAGE_MARK.match(line.strip())
+        if matched:
+            current = int(matched.group(1))
+        if start <= number <= end and current is not None and (not seen or seen[-1] != current):
+            seen.append(current)
+    if not seen:
+        return ""
+    if seen[0] == seen[-1]:
+        return "第 %d 页" % seen[0]
+    return "第 %d-%d 页" % (seen[0], seen[-1])
+
+
+def document_map(text: str, name: str, session: str) -> str:
+    lines = text.splitlines() or [""]
+    heads: list[tuple[int, str]] = []
+    for index, line in enumerate(lines, 1):
+        info = heading_info(line)
+        if info:
+            heads.append((index, info[1]))
+    rows = ["# 目录：%s" % name]
+    if not heads:
+        chars = sum(1 for char in text if not char.isspace())
+        rows.append("没有识别到章节。全文 L1-%d（%d 字）。" % (len(lines), chars))
+    for pos, (start, title) in enumerate(heads):
+        end = heads[pos + 1][0] - 1 if pos + 1 < len(heads) else len(lines)
+        chars = sum(1 for char in "\n".join(lines[start - 1:end]) if not char.isspace())
+        first = ""
+        for extra in lines[start:end]:
+            if extra.strip() and heading_info(extra) is None and not _PAGE_MARK.match(extra.strip()):
+                first = clip_line(extra.strip(), 40)
+                break
+        pages = _section_pages(lines, start, end)
+        tail = " ".join(part for part in (first, pages) if part)
+        rows.append(("L%d-%d %s（%d 字）%s" % (start, end, title, chars, tail)).rstrip())
+    rows.append("按章节读：READ_FILE[%s]: %s#L起-止" % (session, name))
+    rows.append("检索：FIND[%s]: 词 | %s" % (session, name))
+    return "\n".join(rows)
+
+
+def parse_find(body: str) -> tuple[list[str], str] | None:
+    query, sep, path = body.partition("|")
+    if not sep:
+        query, path = body, ""
+    terms = [part.strip() for part in re.split(r"\s+OR\s+", query.strip()) if part.strip()]
+    if not terms or any(len(term) > 80 for term in terms):
+        return None
+    return terms, path.strip().strip("\"'")
+
+
+def classify_find(body: str, cwd: Path, roots: list[Path]) -> tuple[str, str]:
+    parsed = parse_find(body)
+    if not parsed:
+        return "block", "FIND 缺少关键词"
+    if not parsed[1]:
+        return "allow", "只读检索"
+    return classify_outline(parsed[1], cwd, roots)
+
+
+def search_hits(text: str, terms: list[str]) -> list[tuple[int, str, str, str, str]]:
+    lines = text.splitlines()
+    section = ""
+    folded_terms = [term.casefold() for term in terms]
+    hits = []
+    for index, line in enumerate(lines, 1):
+        info = heading_info(line)
+        if info:
+            section = info[1]
+        folded = line.casefold()
+        if any(term in folded for term in folded_terms):
+            prev = lines[index - 2].strip() if index > 1 else ""
+            nxt = lines[index].strip() if index < len(lines) else ""
+            hits.append((index, section, prev, line.strip(), nxt))
+    return hits
+
+
+def _text_for_search(path: Path, rt: Runtime) -> str | None:
+    if path_is_sensitive(path):
+        return None
+    suffix = path.suffix.lower()
+    if suffix in DOC_EXTS or suffix in EXCEL_EXTS:
+        text, error = load_file(str(path), rt.cwd, rt.roots, cache=rt.docs, timeout=rt.timeout)
+        return None if error else text
+    try:
+        if path.stat().st_size > 2 * 1024 * 1024:
+            return None
+        data = path.read_bytes()
+    except OSError:
+        return None
+    if b"\x00" in data and not data.startswith((b"\xff\xfe", b"\xfe\xff")):
+        return None
+    return decode_file_bytes(data)
+
+
+def find_result(directive: Directive, rt: Runtime, started: float) -> ExecResult:
+    parsed = parse_find(directive.body)
+    if not parsed:
+        return ExecResult(1, "FIND 缺少关键词", time.perf_counter() - started)
+    terms, path = parsed
+    target = outline_target(path or ".", rt.cwd)
+    files: list[Path] = []
+    if target.is_file():
+        files = [target]
+    elif target.is_dir():
+        names, _git = outline_names(target)
+        for name in names:
+            if any(sensitive_name(part) for part in name.split("/")):
+                continue
+            try:
+                resolved = (target / name).resolve()
+            except OSError:
+                continue
+            if resolved.is_file() and not path_is_sensitive(resolved) and inside_any(resolved, rt.roots):
+                files.append(resolved)
+    groups: list[str] = []
+    total = 0
+    truncated = False
+    for file in files:
+        if total >= 200:
+            truncated = True
+            break
+        text = _text_for_search(file, rt)
+        if not text:
+            continue
+        hits = search_hits(text, terms)
+        if not hits:
+            continue
+        room = 200 - total
+        shown = hits[:room]
+        total += len(shown)
+        truncated = truncated or len(shown) < len(hits)
+        try:
+            label = str(file.relative_to(rt.cwd).as_posix())
+        except ValueError:
+            label = file.name
+        block = ["## %s" % label]
+        for line_no, section, prev, current, nxt in shown:
+            block.append(("L%d %s" % (line_no, section)).rstrip())
+            if prev:
+                block.append("  " + clip_line(prev, 160))
+            block.append("  " + clip_line(current, 160))
+            if nxt:
+                block.append("  " + clip_line(nxt, 160))
+        groups.append("\n".join(block))
+    if not groups:
+        body = "没有找到：%s" % "、".join(terms)
+    else:
+        body = "\n\n".join(groups)
+        if truncated:
+            body += "\n\n命中超过 200 条，只列出前 200 条。请缩小关键词或指定文件。"
+    return paged_result(body, rt, started, "检索", True)
 
 
 def paged_result(text: str, rt: Runtime, started: float, label: str, number_single: bool) -> ExecResult:
@@ -2606,7 +2819,13 @@ def paged_result(text: str, rt: Runtime, started: float, label: str, number_sing
 
 
 def outline_result(directive: Directive, rt: Runtime, started: float) -> ExecResult:
-    text = project_outline(outline_target(directive.body, rt.cwd), rt.roots)
+    target = outline_target(directive.body, rt.cwd)
+    if target.is_file() and target.suffix.lower() in DOC_EXTS:
+        text, error = load_file(str(target), rt.cwd, rt.roots, cache=rt.docs, timeout=rt.timeout)
+        if error:
+            return ExecResult(1, error, time.perf_counter() - started)
+        return paged_result(document_map(text or "", target.name, rt.session), rt, started, "目录", True)
+    text = project_outline(target, rt.roots)
     return paged_result(text, rt, started, "概览", False)
 
 
@@ -2647,6 +2866,8 @@ def real_execute(directive: Directive, rt: Runtime) -> ExecResult:
         )
     if directive.kind == "OUTLINE":
         return outline_result(directive, rt, started)
+    if directive.kind == "FIND":
+        return find_result(directive, rt, started)
     spec = parse_read_spec(directive.body)
     if spec is None:
         return ExecResult(1, "READ_FILE 缺少路径", time.perf_counter() - started)

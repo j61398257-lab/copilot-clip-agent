@@ -1343,6 +1343,85 @@ class OfficeComponentTests(unittest.TestCase):
             clip_agent.convert_document = original
 
 
+class NavTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name).resolve()
+        self.runtime = make_runtime(self.root)
+        self.original_convert = clip_agent.convert_document
+        self.original_docs = clip_agent.docs_installed
+
+    def tearDown(self):
+        clip_agent.convert_document = self.original_convert
+        clip_agent.docs_installed = self.original_docs
+        self.tmp.cleanup()
+
+    def test_map_line_numbers_can_be_read_back(self):
+        source = "# 总则\n\n本合同由双方签署。\n\n# 付款\n\n违约金为合同金额的百分之十。\n"
+        clip_agent.docs_installed = lambda: True
+        clip_agent.convert_document = lambda path, timeout: source
+        (self.root / "合同.docx").write_bytes(b"PK\x03\x04fake")
+        mapped = clip_agent.handle_text(
+            "OUTLINE[K7Q2]: 合同.docx",
+            self.runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        matched = re.search(r"L(\d+)-(\d+)\s+总则", mapped)
+        self.assertIsNotNone(matched)
+        start, end = matched.group(1), matched.group(2)
+        chunk = clip_agent.handle_text(
+            "READ_FILE[K7Q2]: 合同.docx#L%s-%s" % (start, end),
+            self.runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        self.assertIn("本合同由双方签署", chunk)
+        self.assertNotIn("违约金", chunk)
+        numbered = "第一章 总则\n\n正文甲。\n\n1.1 范围\n\n正文乙。\n"
+        text = clip_agent.document_map(numbered, "编号.docx", "K7Q2")
+        self.assertIn("第一章 总则", text)
+        self.assertIn("1.1 范围", text)
+        self.assertIn("FIND[K7Q2]:", text)
+
+    def test_split_keeps_chapters_and_breaks_on_blank_lines(self):
+        lines = ["# 第一章"] + ["甲" * 40] * 8 + ["# 第二章"] + ["乙" * 40] * 8
+        pages = clip_agent.split_sections(lines, 500)
+        self.assertGreaterEqual(len(pages), 2)
+        self.assertEqual(lines[pages[1][0] - 1], "# 第二章")
+        first = "\n".join(lines[pages[0][0] - 1:pages[0][1]])
+        self.assertIn("# 第一章", first)
+        self.assertNotIn("# 第二章", first)
+        long_lines = ["# 章"]
+        for _ in range(6):
+            long_lines.extend(["句" * 30, ""])
+        pages = clip_agent.split_sections(long_lines, 220)
+        self.assertGreaterEqual(len(pages), 2)
+        for start, end in pages[:-1]:
+            last = long_lines[end - 1]
+            nxt = long_lines[end] if end < len(long_lines) else ""
+            self.assertTrue((not last.strip()) or nxt.startswith("#"))
+
+    def test_find_hits_every_term_and_skips_secrets(self):
+        folder = self.root / "资料"
+        folder.mkdir()
+        (folder / "甲.txt").write_text("# 第四章 付款\n\n应当支付违约金。\n普通句子。\n", encoding="utf-8")
+        (folder / "乙.txt").write_text("另有赔偿条款。\n", encoding="utf-8")
+        (folder / ".env").write_text("违约金 TOKEN=secret\n", encoding="utf-8")
+        (self.root / "合同.txt").write_text("违约金甲\n\n违约金乙\n", encoding="utf-8")
+        rendered = clip_agent.handle_text(
+            "FIND[K7Q2]: 违约金 OR 赔偿 | 资料",
+            self.runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        self.assertIn("违约金", rendered)
+        self.assertIn("赔偿", rendered)
+        self.assertIn("第四章", rendered)
+        self.assertNotIn("TOKEN", rendered)
+        self.assertNotIn(".env", rendered)
+        both = clip_agent.handle_text(
+            "FIND[K7Q2]: 违约金 | 合同.txt",
+            self.runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        self.assertIn("违约金甲", both)
+        self.assertIn("违约金乙", both)
+
+
 class DocTests(unittest.TestCase):
     def test_prompt_file_matches_builtin_template(self):
         text = Path(__file__).with_name("COPILOT_SYSTEM_PROMPT.md").read_text(encoding="utf-8")
