@@ -7,6 +7,7 @@ settings.json
 vendor/
 tools/
 upload/
+.codegraph/
 backup/
 sessions/
 docs-deps-win64.zip

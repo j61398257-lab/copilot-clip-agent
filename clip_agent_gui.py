@@ -2,6 +2,7 @@
 
 不监听剪贴板：只有你在输入框里按 Ctrl+V（或右键“粘贴并执行”）时，输入框才读取一次剪贴板。
 解析、策略、执行、脱敏和审计都走 clip_agent 里同一套代码。
+代码索引建成后，用 codegraph_page 把索引写成一页本地 HTML，再交给系统打开。
 """
 
 from __future__ import annotations
@@ -20,6 +21,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
 import clip_agent as core
+import codegraph_page
 
 FRONT_END = Path(__file__).resolve()
 UI_FONT = ("Microsoft YaHei UI", 10)
@@ -200,7 +202,7 @@ class App:
         auto_wrap(ttk.Label(
             frame,
             text="把 Copilot 回复里的指令粘贴进来执行，结果自动复制回剪贴板，你再贴回 Copilot。"
-            "不联网，不操作浏览器，不监听剪贴板。",
+            "不联网，不操作 Copilot 网页，不监听剪贴板。",
         )).grid(row=1, column=0, columnspan=3, sticky="ew", pady=(6, 20))
         ttk.Label(frame, text="项目目录").grid(row=2, column=0, sticky="w")
         initial = self.base.workdir or core.load_saved_workdir(core.SAVED_WORKDIR) or ""
@@ -293,6 +295,7 @@ class App:
         ttk.Button(extra, text="撤销上一次修改", command=self.undo_change).pack(side="left", padx=8)
         ttk.Button(extra, text="生成续接包", command=self.copy_resume).pack(side="left")
         ttk.Button(extra, text="建立/更新代码索引", command=self.start_index).pack(side="left", padx=8)
+        ttk.Button(extra, text="打开代码地图", command=self.open_map).pack(side="left")
         self.index_status = tk.StringVar(value="")
         ttk.Label(extra, textvariable=self.index_status).pack(side="left")
 
@@ -505,7 +508,46 @@ class App:
             return
         indexed = (self.rt.cwd / ".codegraph").is_dir()
         proc = core.run_codegraph(core.codegraph_index_argv(pair[0], pair[1], self.rt.cwd, indexed), self.rt.cwd, 180)
-        self.inbox.put(("status", "索引已更新" if proc.exit_code == 0 else "索引失败"))
+        if proc.exit_code != 0:
+            self.inbox.put(("status", "索引失败"))
+            return
+        self.publish_map("索引已更新，代码地图已在浏览器打开。")
+
+    def open_map(self) -> None:
+        if self.rt is None:
+            return
+        self.index_status.set("正在生成代码地图……")
+        threading.Thread(target=self.map_worker, daemon=True).start()
+
+    def map_worker(self) -> None:
+        self.publish_map("代码地图已在浏览器打开。")
+
+    def publish_map(self, prefix: str) -> None:
+        if self.rt is None:
+            return
+        try:
+            page = codegraph_page.write_page(
+                self.rt.cwd,
+                hidden=lambda path: core.path_is_sensitive(Path(path)),
+                redact_text=lambda text: core.redact(text)[0],
+            )
+        except codegraph_page.MapError as exc:
+            self.inbox.put(("status", "代码地图没有生成：%s" % exc, "地图未生成", "warn"))
+            return
+        self.inbox.put(("map", str(page), prefix))
+
+    def show_map(self, path: str, prefix: str) -> None:
+        self.index_status.set("代码地图已打开")
+        try:
+            codegraph_page.open_local_html(Path(path))
+        except OSError as exc:
+            self.say("%s打开失败：%s。页面文件在 %s" % (prefix, exc, path), "warn")
+            return
+        self.say(
+            "%s用 Edge 打开这一页后，可用侧边栏 Copilot 阅读，并核对页末的【代码地图结尾】。页面文件在 %s"
+            % (prefix, path),
+            "ok",
+        )
 
     def copy_result(self) -> None:
         if not self.last_payload:
@@ -591,8 +633,13 @@ class App:
         elif kind == "task":
             self.deliver_task(message[1])
         elif kind == "status":
-            self.index_status.set(message[1])
-            self.say(message[1], "ok" if "失败" not in message[1] else "error")
+            text = message[1]
+            short = message[2] if len(message) > 2 else text
+            tone = message[3] if len(message) > 3 else ("error" if "失败" in text else "ok")
+            self.index_status.set(short)
+            self.say(text, tone)
+        elif kind == "map":
+            self.show_map(message[1], message[2])
         elif kind == "error":
             self.set_busy(False)
             self.say("执行出错：%s" % message[1], "error")
