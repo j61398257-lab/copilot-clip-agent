@@ -11,3 +11,4 @@ backup/
 sessions/
 docs-deps-win64.zip
 codegraph-win32-x64-*.zip
+page_probe/
