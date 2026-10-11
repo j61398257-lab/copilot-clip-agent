@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import copy
 import ctypes
+import json
+import os
 import queue
 import threading
 import time
@@ -94,6 +96,7 @@ class ConfirmDialog:
 
     def __init__(self, parent: tk.Tk, command: str, reason: str) -> None:
         self.ok = False
+        self.trust = tk.BooleanVar(value=False)
         lines = command.splitlines()
         python = command.startswith("PYTHON[")
         top = self.top = tk.Toplevel(parent)
@@ -111,6 +114,9 @@ class ConfirmDialog:
         box.configure(state="disabled", takefocus=0)
         buttons = ttk.Frame(body)
         buttons.pack(fill="x", pady=(10, 0))
+        body_text = command.split("]: ", 1)[-1] if command.startswith("TOOL") else ""
+        if body_text and core.trust_allowed(body_text) and not command.startswith(("PYTHON", "PATCH")):
+            ttk.Checkbutton(buttons, text="本会话内这条命令不再询问", variable=self.trust).pack(side="left")
         self.run_button = ttk.Button(
             buttons, text="执行", command=self.accept, state="disabled", default="disabled",
         )
@@ -183,7 +189,10 @@ class App:
         self.build_session()
         self.show(self.setup)
         root.after(50, self.poll)
+        root.after(300, self.poll_auto)
         root.after(30000, self.check_idle)
+        self.own_seq = None
+        self.auto_seen = None
 
     def build_setup(self) -> None:
         frame = self.setup = ttk.Frame(self.root, padding=24)
@@ -210,9 +219,16 @@ class App:
             modes, value="tiered", variable=self.mode,
             text="分级确认：白名单外的命令和 Python 代码逐条弹窗，你点“执行”才运行",
         ).pack(anchor="w", pady=(6, 0))
-        ttk.Button(frame, text="开始会话", command=self.start_session).grid(row=4, column=1, sticky="w", pady=(24, 0))
+        ttk.Label(frame, text="单条上限").grid(row=4, column=0, sticky="w", pady=(16, 0))
+        saved = load_settings()
+        self.max_chars = tk.StringVar(value=str(saved.get("max_chars", self.base.max_chars)))
+        ttk.Combobox(frame, textvariable=self.max_chars, values=("4000", "8000", "16000", "32000"), width=10).grid(
+            row=4, column=1, sticky="w", pady=(16, 0),
+        )
+        ttk.Button(frame, text="测上限", command=self.copy_limit_probe).grid(row=4, column=2, sticky="w", pady=(16, 0))
+        ttk.Button(frame, text="开始会话", command=self.start_session).grid(row=5, column=1, sticky="w", pady=(24, 0))
         self.setup_status = auto_wrap(ttk.Label(frame, textvariable=self.status))
-        self.setup_status.grid(row=5, column=0, columnspan=3, sticky="ew", pady=(18, 0))
+        self.setup_status.grid(row=6, column=0, columnspan=3, sticky="ew", pady=(18, 0))
         frame.columnconfigure(1, weight=1)
 
     def build_session(self) -> None:
@@ -239,9 +255,17 @@ class App:
         self.template_box.pack(side="left")
         self.template_box.bind("<<ComboboxSelected>>", lambda _event: self.fill_template())
         ttk.Button(row, text="复制任务", command=self.copy_task).pack(side="left", padx=8)
+        ttk.Button(row, text="添加文件…", command=self.add_files).pack(side="left")
+        ttk.Button(row, text="打开上传包", command=self.open_pack).pack(side="left", padx=8)
+        self.with_code = tk.BooleanVar(value=True)
+        ttk.Checkbutton(row, text="附带代码上下文", variable=self.with_code).pack(side="left")
+        self.files: list[Path] = []
+        self.file_box = tk.Listbox(step2, height=3)
+        self.file_box.pack(fill="x", pady=(6, 0))
         task_frame = ttk.Frame(step2)
         task_frame.pack(fill="x", pady=(6, 0))
         self.task = scrolled_text(task_frame, height=3, wrap="word", font=UI_FONT, undo=True)
+        self.task.bind("<<Paste>>", self.on_task_paste)
 
         self.step3 = ttk.LabelFrame(frame, padding=8)
         self.step3.pack(fill="both", expand=True, pady=(10, 0))
@@ -251,6 +275,8 @@ class App:
         self.input.bind("<Button-3>", self.input_menu)
         buttons = ttk.Frame(self.step3)
         buttons.pack(fill="x", pady=(6, 0))
+        self.auto = tk.BooleanVar(value=False)
+        ttk.Checkbutton(buttons, text="自动接收", variable=self.auto, command=self.arm_auto).pack(side="left", padx=(0, 8))
         self.run_button = ttk.Button(buttons, text="执行（Ctrl+Enter）", command=self.run_input)
         self.run_button.pack(side="left")
         ttk.Button(buttons, text="清空", command=self.clear_input).pack(side="left", padx=8)
@@ -261,7 +287,14 @@ class App:
         self.step4 = ttk.LabelFrame(frame, padding=8)
         self.step4.pack(fill="both", expand=True, pady=(10, 0))
         self.result = scrolled_text(self.step4, height=10, wrap="word", font=CODE_FONT, state="disabled")
-        ttk.Button(self.step4, text="再次复制结果", command=self.copy_result).pack(anchor="w", pady=(6, 0))
+        extra = ttk.Frame(self.step4)
+        extra.pack(fill="x", pady=(6, 0))
+        ttk.Button(extra, text="再次复制结果", command=self.copy_result).pack(side="left")
+        ttk.Button(extra, text="撤销上一次修改", command=self.undo_change).pack(side="left", padx=8)
+        ttk.Button(extra, text="生成续接包", command=self.copy_resume).pack(side="left")
+        ttk.Button(extra, text="建立/更新代码索引", command=self.start_index).pack(side="left", padx=8)
+        self.index_status = tk.StringVar(value="")
+        ttk.Label(extra, textvariable=self.index_status).pack(side="left")
 
         self.session_status = auto_wrap(ttk.Label(frame, textvariable=self.status))
         self.session_status.pack(fill="x", pady=(10, 0))
@@ -292,6 +325,12 @@ class App:
         args = copy.copy(self.base)
         args.workdir = workdir
         args.mode = self.mode.get()
+        try:
+            args.max_chars = int(self.max_chars.get())
+        except ValueError:
+            self.say("单条上限要是数字。", "warn")
+            return
+        save_settings({"max_chars": args.max_chars})
         roots, problem = core.collect_roots(args)
         if problem:
             self.say(problem, "error")
@@ -375,12 +414,98 @@ class App:
         if self.rt is not None:
             self.copy_text(self.rt.brief, "预设提示词已复制。到 Copilot 对话框粘贴并发送。")
 
+    def add_files(self) -> None:
+        chosen = filedialog.askopenfilenames(parent=self.root, title="添加文件")
+        for name in chosen:
+            self.add_attachment(Path(name))
+
+    def add_attachment(self, path: Path) -> None:
+        if len(self.files) >= 5:
+            self.say("一次最多附加 5 个文件。", "warn")
+            return
+        resolved = path.resolve()
+        if resolved not in self.files:
+            self.files.append(resolved)
+            self.file_box.insert("end", resolved.name)
+
+    def on_task_paste(self, _event=None):
+        files = clipboard_files()
+        if not files:
+            return None
+        for name in files:
+            self.add_attachment(Path(name))
+        return "break"
+
     def copy_task(self) -> None:
+        if self.rt is None:
+            return
         text = self.task.get("1.0", "end-1c").strip()
         if not text:
             self.say("任务是空的。先选一个模板或自己写一句。", "warn")
             return
-        self.copy_text(text, "任务已复制。到 Copilot 对话框粘贴并发送，把它回复里的代码块复制到第 ③ 步。")
+        self.rt.max_chars = int(self.max_chars.get())
+        files = list(self.files)
+        with_code = bool(self.with_code.get())
+        self.say("正在准备任务……")
+        threading.Thread(target=self.compose_worker, args=(text, files, with_code), daemon=True).start()
+
+    def compose_worker(self, text: str, files: list, with_code: bool) -> None:
+        try:
+            message = core.compose_task(text, files, with_code, self.rt)
+        except Exception as exc:
+            self.inbox.put(("error", "%s：%s" % (exc.__class__.__name__, exc)))
+            return
+        self.inbox.put(("task", message))
+
+    def open_pack(self) -> None:
+        if self.rt is None:
+            return
+        folder = core.session_upload(self.rt.session)
+        if not folder.is_dir():
+            self.say("还没有上传包。", "warn")
+            return
+        os.startfile(folder)
+
+    def copy_limit_probe(self) -> None:
+        try:
+            limit = int(self.max_chars.get())
+        except ValueError:
+            self.say("单条上限要是数字。", "warn")
+            return
+        marker = "【结尾标记 %d】" % limit
+        body = ("0123456789" * ((limit // 10) + 1))[: max(0, limit - len(marker))]
+        self.copy_text(body + marker, "测试文字已复制（%d 字符）。粘进 Copilot 输入框，不用发送，看结尾标记还在不在。" % limit)
+
+    def arm_auto(self) -> None:
+        if self.auto.get():
+            self.auto_seen = core.clipboard_sequence()
+            self.last_active = time.monotonic()
+            self.say("自动接收已打开。在 Copilot 里复制带会话码的指令即可，只读指令会直接执行。", "ok")
+
+    def undo_change(self) -> None:
+        if self.rt is None:
+            return
+        self.say(core.undo_last_change(self.rt), "ok")
+
+    def copy_resume(self) -> None:
+        if self.rt is None:
+            return
+        self.copy_text(core.build_resume(self.rt), "续接包已复制。")
+
+    def start_index(self) -> None:
+        if self.rt is None:
+            return
+        self.index_status.set("正在索引……")
+        threading.Thread(target=self.index_worker, daemon=True).start()
+
+    def index_worker(self) -> None:
+        pair = core.find_codegraph()
+        if pair is None:
+            self.inbox.put(("status", "未安装 CodeGraph，使用内置概览"))
+            return
+        indexed = (self.rt.cwd / ".codegraph").is_dir()
+        proc = core.run_codegraph(core.codegraph_index_argv(pair[0], pair[1], self.rt.cwd, indexed), self.rt.cwd, 180)
+        self.inbox.put(("status", "索引已更新" if proc.exit_code == 0 else "索引失败"))
 
     def copy_result(self) -> None:
         if not self.last_payload:
@@ -409,9 +534,10 @@ class App:
         self.run_button.configure(state="disabled" if busy else "normal")
         self.input.configure(state="disabled" if busy else "normal")
 
-    def run_input(self) -> None:
+    def run_input(self, method: str = "window") -> None:
         if self.busy or self.rt is None:
             return
+        self.rt.input_method = method
         text = self.input.get("1.0", "end-1c")
         if not text.strip():
             self.say("输入框是空的。把 Copilot 回复里的代码块复制过来，在这里按 Ctrl+V。", "warn")
@@ -452,12 +578,21 @@ class App:
         if kind == "confirm":
             _, command, reason, holder, done = message
             try:
-                holder["ok"] = ConfirmDialog(self.root, command, reason).ok
+                dialog = ConfirmDialog(self.root, command, reason)
+                holder["ok"] = dialog.ok
+                body = command.split("]: ", 1)[-1] if command.startswith("TOOL") else ""
+                if dialog.ok and dialog.trust.get() and body and self.rt is not None and core.trust_allowed(body):
+                    self.rt.trusted.add(body)
             finally:
                 done.set()
         elif kind == "reply":
             self.set_busy(False)
             self.show_reply(message[1])
+        elif kind == "task":
+            self.deliver_task(message[1])
+        elif kind == "status":
+            self.index_status.set(message[1])
+            self.say(message[1], "ok" if "失败" not in message[1] else "error")
         elif kind == "error":
             self.set_busy(False)
             self.say("执行出错：%s" % message[1], "error")
@@ -467,10 +602,17 @@ class App:
         if reply.payload is None:
             self.say("\n".join(reply.notes), "warn")
             return
-        self.last_payload = reply.payload
-        set_text(self.result, reply.payload)
+        payload = reply.payload
+        if self.rt is not None:
+            spilled = core.spill_result(self.rt, self.rt.step, payload)
+            if spilled:
+                payload = "完整结果在 %s（%d 字），请上传后继续。\n\n%s" % (spilled, len(reply.payload), reply.payload[:800])
+                self.open_pack()
+        self.last_payload = payload
+        set_text(self.result, payload)
         try:
-            seq = core.clipboard_write(reply.payload)
+            seq = core.clipboard_write(payload)
+            self.own_seq = seq
         except OSError as exc:
             self.say("写回剪贴板失败：%s。可以点“再次复制结果”重试。" % exc, "error")
             return
@@ -485,6 +627,32 @@ class App:
             parts.append("本批：%s。" % batch_summary(reply.items))
         parts.extend(reply.notes)
         self.say("\n".join(parts), "warn" if reply.kind == "rejected" else "ok")
+
+    def deliver_task(self, message: str) -> None:
+        folder = core.session_upload(self.rt.session) if self.rt is not None else None
+        if folder is not None and folder.is_dir() and "00_目录.md" in message:
+            os.startfile(folder)
+            self.copy_text(message, "上传包已打开。先把里面的文件拖进 Copilot，再粘贴任务发送。")
+            return
+        self.copy_text(message, "任务已复制。到 Copilot 对话框粘贴并发送。")
+
+    def poll_auto(self) -> None:
+        try:
+            if self.auto.get() and self.rt is not None and not self.busy:
+                if time.monotonic() - self.last_active > 600:
+                    self.auto.set(False)
+                    self.say("10 分钟没有新指令，自动接收已关闭。", "warn")
+                else:
+                    seq = core.clipboard_sequence()
+                    if seq not in (self.own_seq, self.auto_seen):
+                        self.auto_seen = seq
+                        text = core.clipboard_read_text()
+                        if core.looks_like_directives(text, self.rt.session):
+                            self.input.delete("1.0", "end")
+                            self.input.insert("1.0", text)
+                            self.run_input("auto")
+        finally:
+            self.root.after(300, self.poll_auto)
 
     def check_idle(self) -> None:
         try:
@@ -506,6 +674,50 @@ class App:
     def on_error(self, exc_type, exc, tb) -> None:
         detail = "".join(traceback.format_exception(exc_type, exc, tb))
         messagebox.showerror("出错了", "%s：%s" % (exc_type.__name__, exc), detail=detail, parent=self.root)
+
+
+def load_settings() -> dict:
+    path = core.TOOL_DIR / "settings.json"
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def save_settings(values: dict) -> None:
+    path = core.TOOL_DIR / "settings.json"
+    current = load_settings()
+    current.update(values)
+    try:
+        path.write_text(json.dumps(current, ensure_ascii=False), encoding="utf-8")
+    except OSError:
+        pass
+
+
+def clipboard_files() -> list[str]:
+    win = ctypes.wintypes
+    core.shell32.DragQueryFileW.argtypes = [win.HANDLE, win.UINT, win.LPWSTR, win.UINT]
+    core.shell32.DragQueryFileW.restype = win.UINT
+    hwnd = core._create_owner()
+    found: list[str] = []
+    try:
+        if not core._open_clipboard(hwnd):
+            return []
+        try:
+            handle = core.user32.GetClipboardData(15)
+            if not handle:
+                return []
+            count = core.shell32.DragQueryFileW(handle, 0xFFFFFFFF, None, 0)
+            for index in range(count):
+                buf = ctypes.create_unicode_buffer(1024)
+                core.shell32.DragQueryFileW(handle, index, buf, 1024)
+                if buf.value:
+                    found.append(buf.value)
+        finally:
+            core.user32.CloseClipboard()
+    finally:
+        core.user32.DestroyWindow(hwnd)
+    return found
 
 
 def set_dpi_awareness() -> None:
