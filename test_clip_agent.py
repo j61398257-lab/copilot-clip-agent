@@ -488,6 +488,124 @@ class PythonBlockTests(unittest.TestCase):
         self.assertIn("10", rendered)
 
 
+class OutlineTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name).resolve()
+        (self.root / "app.py").write_text(
+            '"""订单服务入口。"""\n'
+            "import helpers\n"
+            "from dataclasses import dataclass\n"
+            "\n"
+            "\n"
+            "@dataclass\n"
+            "class Order:\n"
+            "    sku: str\n"
+            "    qty: int\n"
+            "\n"
+            "    def total(self, price):\n"
+            "        return self.qty * price\n"
+            "\n"
+            "\n"
+            "def load_orders(path, limit=10):\n"
+            '    """从 CSV 读取订单。"""\n'
+            "    return helpers.read_rows(path)[:limit]\n"
+            "\n"
+            "\n"
+            'if __name__ == "__main__":\n'
+            "    print(load_orders('a.csv'))\n",
+            encoding="utf-8",
+        )
+        (self.root / "helpers.py").write_text("def read_rows(path):\n    return []\n", encoding="utf-8")
+        (self.root / "web").mkdir()
+        (self.root / "web" / "view.ts").write_text(
+            "export interface Props { name: string }\n"
+            "export class View {}\n"
+            "export async function render(props: Props) {\n  return props.name\n}\n",
+            encoding="utf-8",
+        )
+        (self.root / "README.md").write_text(
+            "# 订单工具\n\n读取订单表并汇总金额。\n\n## 用法\n\n运行 app.py。\n", encoding="utf-8",
+        )
+        (self.root / ".env").write_text("TOKEN=abc\n", encoding="utf-8")
+        (self.root / "blob.bin").write_bytes(b"\x00\x01\x02" * 100)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_outline_line_is_a_directive(self):
+        directives, error = clip_agent.parse_batch("- `OUTLINE[k7q2]: web`\nOUTLINE[K7Q2]:", SESSION, 5)
+        self.assertIsNone(error)
+        self.assertEqual([(item.kind, item.body) for item in directives], [("OUTLINE", "web"), ("OUTLINE", "")])
+
+    def test_outline_maps_files_symbols_and_docs(self):
+        text = clip_agent.project_outline(self.root)
+        self.assertIn("app.py 21", text)
+        self.assertIn("订单服务入口", text)
+        self.assertIn("L7 class Order", text)
+        self.assertIn("sku, qty", text)
+        self.assertIn("total", text)
+        self.assertIn("L15 def load_orders(path, limit)", text)
+        self.assertIn("从 CSV 读取订单", text)
+        self.assertIn("依赖本项目：helpers", text)
+        self.assertIn("可直接运行", text)
+        self.assertIn("render", text)
+        self.assertIn("View", text)
+        self.assertIn("Props", text)
+        self.assertIn("读取订单表并汇总金额", text)
+        self.assertNotIn(".env", text)
+        self.assertNotIn("TOKEN", text)
+
+    def test_outline_lists_every_symbol_of_big_files(self):
+        body = "".join("def step_%03d(value):\n    return value\n\n\n" % index for index in range(150))
+        (self.root / "many.py").write_text(body, encoding="utf-8")
+        text = clip_agent.project_outline(self.root)
+        self.assertIn("符号较多", text)
+        self.assertIn("L1 step_000", text)
+        self.assertIn("L597 step_149", text)
+        self.assertIn("L15 def load_orders(path, limit)", text)
+
+    def test_outline_pages_through_result_store(self):
+        body = "".join("def step_%03d(value):\n    return value\n\n\n" % index for index in range(150))
+        (self.root / "many.py").write_text(body, encoding="utf-8")
+        runtime = make_runtime(self.root, max_chars=1800)
+        first = clip_agent.handle_text("OUTLINE[K7Q2]: .", runtime, clip_agent.real_execute, lambda *_: False)
+        self.assertIn("[RESULT #1] OUTLINE", first)
+        self.assertIn("truncated=no", first)
+        self.assertLessEqual(len(first), 1800)
+        pages = re.findall(r"READ_FILE\[K7Q2\]: result:1#L\d+-\d+", first)
+        self.assertTrue(pages)
+        second = clip_agent.handle_text(pages[0], runtime, clip_agent.real_execute, lambda *_: False)
+        self.assertIn("[RESULT #2] READ_FILE", second)
+        self.assertTrue(set(re.findall(r"step_\d{3}", second)) - set(re.findall(r"step_\d{3}", first)))
+
+    def test_outline_stays_inside_allowed_dirs(self):
+        runtime = make_runtime(self.root)
+        for body in ("..", ".ssh"):
+            with self.subTest(body=body):
+                rendered = clip_agent.handle_text(
+                    "OUTLINE[K7Q2]: %s" % body, runtime, fake_executor, lambda *_: False,
+                )
+                self.assertIn("BLOCKED OUTLINE", rendered)
+        rendered = clip_agent.handle_text("OUTLINE[K7Q2]: web", runtime, clip_agent.real_execute, lambda *_: False)
+        self.assertIn("render", rendered)
+        self.assertNotIn("app.py", rendered)
+
+    def test_task_with_outline_fits_one_message(self):
+        runtime = make_runtime(self.root, max_chars=4000)
+        task = "请帮我了解这个项目，告诉我入口在哪里。"
+        message = clip_agent.task_with_outline(task, runtime)
+        self.assertTrue(message.startswith(task))
+        self.assertIn("[RESULT #1] OUTLINE", message)
+        self.assertIn("load_orders", message)
+        self.assertLessEqual(len(message), 4000)
+        self.assertEqual(runtime.step, 1)
+        self.assertEqual(runtime.audit.records[-1]["decision"], "allow")
+
+    def test_default_write_back_fits_short_copilot_inputs(self):
+        self.assertEqual(clip_agent.build_parser().parse_args([]).max_chars, 4000)
+
+
 class RespondTests(unittest.TestCase):
     def test_results_come_with_items_and_no_hints(self):
         runtime = make_runtime(tempfile.gettempdir())
@@ -1160,6 +1278,7 @@ class DocTests(unittest.TestCase):
             with self.subTest(mode=mode):
                 self.assertIn("已就绪，请告诉我任务", text)
                 self.assertIn("DONE:", text)
+                self.assertIn("OUTLINE[K7Q2]: .", text)
                 self.assertLess(len(text), 4000)
                 blocks = [
                     block for block in re.findall(r"```text\n(.*?)```", text, re.S)
