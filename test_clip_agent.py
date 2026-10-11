@@ -1730,6 +1730,119 @@ class UploadTests(unittest.TestCase):
         self.assertNotIn("不该读到", blocked)
 
 
+class FreedomTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name).resolve()
+        self.runtime = make_runtime(self.root, mode="tiered")
+        self.roots = (clip_agent.UPLOAD_ROOT, clip_agent.BACKUP_ROOT, clip_agent.SESSIONS_ROOT)
+        clip_agent.UPLOAD_ROOT = self.root / "upload"
+        clip_agent.BACKUP_ROOT = self.root / "backup"
+        clip_agent.SESSIONS_ROOT = self.root / "sessions"
+
+    def tearDown(self):
+        clip_agent.UPLOAD_ROOT, clip_agent.BACKUP_ROOT, clip_agent.SESSIONS_ROOT = self.roots
+        self.tmp.cleanup()
+
+    def test_auto_receive_only_accepts_this_session(self):
+        self.assertTrue(clip_agent.looks_like_directives("READ_FILE[K7Q2]: a.txt", "K7Q2"))
+        self.assertFalse(clip_agent.looks_like_directives("hello", "K7Q2"))
+        self.assertFalse(clip_agent.looks_like_directives("READ_FILE[ZZZZ]: a.txt", "K7Q2"))
+        self.assertFalse(clip_agent.looks_like_directives("x" * 20001, "K7Q2"))
+
+    def test_long_result_is_a_file_unless_marked(self):
+        self.runtime.max_chars = 100
+        name = clip_agent.spill_result(self.runtime, 3, "甲" * 180)
+        self.assertEqual(name, "结果_第3步.md")
+        self.assertEqual((clip_agent.session_upload(self.runtime.session) / name).read_text(encoding="utf-8"), "甲" * 180)
+        self.runtime.markers = ["机密"]
+        self.assertIsNone(clip_agent.spill_result(self.runtime, 4, "机密" + "甲" * 180))
+
+    def test_patch_replaces_once_and_can_undo(self):
+        target = self.root / "app.py"
+        target.write_bytes(b"\xef\xbb\xbf" + "value = total\r\n".encode("utf-8"))
+        calls = []
+
+        def confirm(command, reason):
+            calls.append(command)
+            return True
+
+        block = "\n".join([
+            "PATCH[K7Q2]: app.py",
+            "<<<<<<< 查找",
+            "value = total",
+            "=======",
+            "value = round(total, 2)",
+            ">>>>>>> 替换",
+            "END_PATCH",
+        ])
+        missing = block.replace("value = total", "missing")
+        denied = clip_agent.handle_text(missing, self.runtime, clip_agent.real_execute, confirm)
+        self.assertIn("出现 0 次", denied)
+        self.assertIn(b"value = total", target.read_bytes())
+        twice = (self.root / "app.py").read_text(encoding="utf-8")
+        target.write_text(twice + twice, encoding="utf-8")
+        twice_denied = clip_agent.handle_text(block, self.runtime, clip_agent.real_execute, confirm)
+        self.assertIn("出现 2 次", twice_denied)
+        target.write_bytes(b"\xef\xbb\xbf" + "value = total\r\n".encode("utf-8"))
+        self.runtime.check_command = "Write-Output CHECK_OK"
+        done = clip_agent.handle_text(block, self.runtime, clip_agent.real_execute, confirm)
+        self.assertIn("已修改", done)
+        self.assertIn("检查通过", done)
+        self.assertIn("CHECK_OK", done)
+        data = target.read_bytes()
+        self.assertTrue(data.startswith(b"\xef\xbb\xbf"))
+        self.assertIn(b"\r\n", data)
+        self.assertIn("round(total, 2)", data.decode("utf-8-sig"))
+        self.assertIn("已撤销", clip_agent.undo_last_change(self.runtime))
+        self.assertIn("value = total", target.read_text(encoding="utf-8-sig"))
+        target.write_text("changed again\n", encoding="utf-8")
+        self.runtime.changed.append(str(target))
+        # 再改一次后不能撤销上一份已经恢复的备份；重新打补丁后再改文件
+        clip_agent.handle_text(block.replace("value = total", "changed again"), self.runtime, clip_agent.real_execute, confirm)
+        target.write_text("later\n", encoding="utf-8")
+        self.assertIn("又被改过", clip_agent.undo_last_change(self.runtime))
+        readonly = make_runtime(self.root, mode="readonly")
+        blocked = clip_agent.handle_text(block, readonly, clip_agent.real_execute, confirm)
+        self.assertIn("只读档不能修改", blocked)
+
+    def test_trust_is_exact_and_not_for_deletes(self):
+        self.assertFalse(clip_agent.trust_allowed("Remove-Item a.txt"))
+        self.assertTrue(clip_agent.trust_allowed("Write-Output hello"))
+        asks = []
+
+        def confirm(command, reason):
+            asks.append(command)
+            return True
+
+        command = "TOOL[K7Q2]: Write-Output hello"
+        clip_agent.handle_text(command, self.runtime, clip_agent.real_execute, confirm)
+        self.assertEqual(len(asks), 1)
+        self.runtime.trusted.add("Write-Output hello")
+        clip_agent.handle_text(command, self.runtime, clip_agent.real_execute, confirm)
+        self.assertEqual(len(asks), 1)
+        clip_agent.handle_text("TOOL[K7Q2]: Write-Output hello!", self.runtime, clip_agent.real_execute, confirm)
+        self.assertEqual(len(asks), 2)
+
+    def test_note_is_redacted_and_resume_mentions_it(self):
+        reply = clip_agent.handle_text(
+            "NOTE[K7Q2]: 联系 alice@example.com",
+            self.runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        self.assertIn("已记下第 1 条", reply)
+        notes = list(clip_agent.sessions_root().rglob("笔记.md"))[0].read_text(encoding="utf-8")
+        self.assertNotIn("alice@example.com", notes)
+        self.runtime.task_text = "审查合同"
+        self.runtime.seen.append("合同.md")
+        text = clip_agent.build_resume(self.runtime)
+        self.assertIn("审查合同", text)
+        self.assertIn("合同.md", text)
+        self.runtime.max_chars = 20
+        short = clip_agent.build_resume(self.runtime)
+        self.assertIn("续接包.md", short)
+        self.assertTrue((clip_agent.session_upload(self.runtime.session) / "续接包.md").is_file())
+
+
 class DocTests(unittest.TestCase):
     def test_prompt_file_matches_builtin_template(self):
         text = Path(__file__).with_name("COPILOT_SYSTEM_PROMPT.md").read_text(encoding="utf-8")
