@@ -17,6 +17,7 @@ import os
 import queue
 import re
 import secrets
+import sqlite3
 import struct
 import subprocess
 import sys
@@ -149,9 +150,9 @@ DEFAULT_MARKERS = (
 BIDI = set(range(0x202A, 0x202F)) | set(range(0x2066, 0x206A)) | {0x200E, 0x200F}
 ZERO_WIDTH = dict.fromkeys(map(ord, "\u200b\u200c\u200d\u2060\ufeff"), None)
 ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
-LOOSE_RE = re.compile(r"^(TOOL|READ_FILE|OUTLINE|FIND|PYTHON)\s*[\[:]", re.IGNORECASE)
+LOOSE_RE = re.compile(r"^(TOOL|READ_FILE|OUTLINE|FIND|TABLE|PYTHON)\s*[\[:]", re.IGNORECASE)
 STRICT_RE = re.compile(
-    r"^(TOOL|READ_FILE|OUTLINE|FIND)\s*\[([A-Za-z0-9]{4})\]\s*:\s*(.*)$",
+    r"^(TOOL|READ_FILE|OUTLINE|FIND|TABLE)\s*\[([A-Za-z0-9]{4})\]\s*:\s*(.*)$",
     re.IGNORECASE,
 )
 PY_START_RE = re.compile(r"^PYTHON\s*\[([A-Za-z0-9]{4})\]\s*:\s*(.*)$", re.IGNORECASE)
@@ -1222,6 +1223,22 @@ def parse_read_spec(body: str) -> dict | None:
     text = body.strip()
     if len(text) >= 2 and text[0] == text[-1] and text[0] in "\"'":
         text = text[1:-1].strip()
+    excel = re.search(
+        r"#(?P<sheet>[^!#]+?)!(?P<c1>[A-Za-z]+)(?P<r1>\d+):(?P<c2>[A-Za-z]+)(?P<r2>\d+)$",
+        text,
+    )
+    if excel:
+        return {
+            "type": "excel",
+            "path": text[:excel.start()].strip(),
+            "sheet": excel.group("sheet").strip(),
+            "c1": excel.group("c1"),
+            "r1": int(excel.group("r1")),
+            "c2": excel.group("c2"),
+            "r2": int(excel.group("r2")),
+            "start": None,
+            "end": None,
+        }
     start = end = None
     matched = re.search(r"#L(\d+)-(\d+)$", text)
     if matched:
@@ -1643,6 +1660,8 @@ def run_directives(directives: list[Directive], rt: Runtime, executor, confirm) 
             decision, reason = classify_outline(directive.body, rt.cwd, rt.roots)
         elif directive.kind == "FIND":
             decision, reason = classify_find(directive.body, rt.cwd, rt.roots)
+        elif directive.kind == "TABLE":
+            decision, reason = classify_table(directive.body, rt.cwd, rt.roots)
         else:
             decision, reason = classify_read(directive.body, rt.mode, rt.cwd, rt.roots)
         if decision == "confirm":
@@ -1739,7 +1758,7 @@ def reject_hint(error: str) -> str:
 
 
 def accepted_prefixes(rt: Runtime) -> str:
-    kinds = ["OUTLINE", "FIND", "TOOL", "READ_FILE"] + (["PYTHON"] if rt.mode == "tiered" else [])
+    kinds = ["OUTLINE", "FIND", "TABLE", "TOOL", "READ_FILE"] + (["PYTHON"] if rt.mode == "tiered" else [])
     return "、".join("%s[%s]:" % (kind, rt.session) for kind in kinds)
 
 
@@ -2818,8 +2837,363 @@ def paged_result(text: str, rt: Runtime, started: float, label: str, number_sing
     )
 
 
+_NUMBER_TEXT = re.compile(r"-?\d+(?:\.\d+)?")
+_SAFE_SQL_FN = {
+    "count", "sum", "avg", "min", "max", "round", "substr", "strftime",
+    "length", "lower", "upper", "trim", "ltrim", "rtrim", "coalesce",
+    "ifnull", "abs", "total", "group_concat", "replace", "instr", "typeof",
+    "nullif", "iif", "like", "glob",
+}
+
+
+def column_index(letters: str) -> int:
+    value = 0
+    for char in letters.upper():
+        if not ("A" <= char <= "Z"):
+            raise ValueError(letters)
+        value = value * 26 + ord(char) - 64
+    return value - 1
+
+
+def column_label(index: int) -> str:
+    label = ""
+    number = index + 1
+    while number:
+        number, rem = divmod(number - 1, 26)
+        label = chr(65 + rem) + label
+    return label
+
+
+def _is_number(value) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _is_text_number(value) -> bool:
+    return isinstance(value, str) and bool(_NUMBER_TEXT.fullmatch(value.strip()))
+
+
+def _num(value) -> str:
+    if isinstance(value, float):
+        text = ("%.4f" % value).rstrip("0").rstrip(".")
+        return text or "0"
+    return str(value)
+
+
+def detect_header(rows: list) -> int:
+    best, score = 0, -1
+    for index, row in enumerate(rows[:8]):
+        filled = [cell for cell in row if cell not in (None, "")]
+        if not filled:
+            continue
+        texts = sum(1 for cell in filled if isinstance(cell, str) and not _is_text_number(cell))
+        current = len(filled) + texts
+        if current > score:
+            best, score = index, current
+    return best
+
+
+def _markdown_rows(headers: list[str], data: list) -> str:
+    lines = [" | ".join(headers), " | ".join("---" for _ in headers)]
+    for row in data:
+        cells = []
+        for index in range(len(headers)):
+            value = row[index] if index < len(row) else ""
+            cells.append("" if value is None else str(value).replace("\n", " "))
+        lines.append(" | ".join(cells))
+    return "\n".join(lines)
+
+
+def format_sheet(name: str, rows: list) -> str:
+    if not rows:
+        return "### %s\n空表" % name
+    width = max((len(row) for row in rows), default=0)
+    padded = [list(row) + [None] * (width - len(row)) for row in rows]
+    header_at = detect_header(padded)
+    headers = []
+    for index, cell in enumerate(padded[header_at]):
+        text = "" if cell is None else str(cell).strip()
+        headers.append(text or ("列%d" % (index + 1)))
+    data = padded[header_at + 1:]
+    lines = ["### %s" % name, "%d 行 × %d 列" % (len(data), len(headers))]
+    if header_at:
+        lines.append("表头在第 %d 行" % (header_at + 1))
+    for col, header in enumerate(headers):
+        values = [row[col] for row in data]
+        numbers = [value for value in values if _is_number(value)]
+        texts = [str(value) for value in values if isinstance(value, str) and value.strip() and not _is_text_number(value)]
+        text_numbers = [value.strip() for value in values if _is_text_number(value)]
+        empty = sum(1 for value in values if value in (None, ""))
+        distinct = len({str(value) for value in values if value not in (None, "")})
+        bits = ["空值 %d" % empty, "不同值 %d" % distinct]
+        if numbers:
+            bits.append("最小 %s、最大 %s、合计 %s、平均 %s" % (
+                _num(min(numbers)), _num(max(numbers)), _num(sum(numbers)), _num(sum(numbers) / len(numbers)),
+            ))
+        if texts:
+            top = Counter(texts).most_common(5)
+            bits.append("常见 " + "、".join("%s×%d" % item for item in top))
+        if text_numbers:
+            bits.append("文本数字 %d 个" % len(text_numbers))
+        lines.append("- %s：%s" % (header, "；".join(bits)))
+    lines.append("前 5 行：")
+    lines.append(_markdown_rows(headers, data[:5]))
+    if len(padded) * width <= 2000:
+        lines.append("全表：")
+        lines.append(_markdown_rows(headers, data))
+    return "\n".join(lines)
+
+
+def format_workbook(sheets: list[tuple[str, list]], hidden_count: int) -> str:
+    parts = []
+    if hidden_count:
+        parts.append("另有 %d 张隐藏工作表，未列出。" % hidden_count)
+    parts.extend(format_sheet(name, rows) for name, rows in sheets)
+    return "\n\n".join(parts) if parts else "工作簿是空的。"
+
+
+def format_region(rows: list, c1: str, r1: int, c2: str, r2: int) -> tuple[str | None, str]:
+    try:
+        left, right = column_index(c1), column_index(c2)
+    except ValueError:
+        return None, "区域无效"
+    if left > right or r1 < 1 or r2 < r1:
+        return None, "区域无效"
+    if (right - left + 1) * (r2 - r1 + 1) > 2000:
+        return None, "一次最多 2000 个单元格"
+    header = "   " + " ".join(column_label(index) for index in range(left, right + 1))
+    lines = [header]
+    for row_no in range(r1, r2 + 1):
+        source = rows[row_no - 1] if row_no - 1 < len(rows) else []
+        cells = []
+        for col in range(left, right + 1):
+            value = source[col] if col < len(source) else ""
+            cells.append("" if value is None else str(value))
+        lines.append("%d  %s" % (row_no, " ".join(cells)))
+    return "\n".join(lines), ""
+
+
+def _sql_authorizer(action, arg1, arg2, _db, _source):
+    if action in (sqlite3.SQLITE_SELECT, sqlite3.SQLITE_TRANSACTION):
+        return sqlite3.SQLITE_OK
+    if action == sqlite3.SQLITE_READ and arg1 in (None, "t"):
+        return sqlite3.SQLITE_OK
+    if action == sqlite3.SQLITE_FUNCTION:
+        name = str(arg1 or arg2 or "").lower()
+        if name in _SAFE_SQL_FN:
+            return sqlite3.SQLITE_OK
+    return sqlite3.SQLITE_DENY
+
+
+def query_table(headers: list, rows: list, sql: str) -> str:
+    statement = sql.strip().rstrip(";").strip()
+    names: list[str] = []
+    seen: dict[str, int] = {}
+    for header in headers:
+        base = str(header).strip() or "列"
+        seen[base] = seen.get(base, 0) + 1
+        names.append(base if seen[base] == 1 else "%s_%d" % (base, seen[base]))
+    columns = "、".join(names)
+    if not statement or ";" in statement:
+        return "只允许一条 SELECT。\n表名是 t。列名：%s" % columns
+    if not re.match(r"(?is)^(select|with)\b", statement):
+        return "只允许 SELECT。\n表名是 t。列名：%s" % columns
+    conn = sqlite3.connect(":memory:")
+    try:
+        quoted = ", ".join('"%s"' % name.replace('"', '""') for name in names)
+        conn.execute("CREATE TABLE t (%s)" % quoted)
+        placeholders = ", ".join("?" for _ in names)
+        for row in rows:
+            values = []
+            for index in range(len(names)):
+                value = row[index] if index < len(row) else None
+                values.append(None if value == "" else value)
+            conn.execute("INSERT INTO t VALUES (%s)" % placeholders, values)
+        conn.commit()
+        steps = {"n": 0}
+
+        def progress() -> int:
+            steps["n"] += 1
+            return 1 if steps["n"] > 2000 else 0
+
+        conn.set_progress_handler(progress, 1000)
+        conn.set_authorizer(_sql_authorizer)
+        try:
+            cursor = conn.execute(statement)
+            fetched = cursor.fetchmany(201)
+        except sqlite3.Error as exc:
+            return "查询失败：%s\n表名是 t。列名：%s" % (exc, columns)
+        labels = [item[0] for item in cursor.description or []]
+        lines = [" | ".join(labels)]
+        for record in fetched[:200]:
+            lines.append(" | ".join("" if value is None else str(value) for value in record))
+        if len(fetched) > 200:
+            lines.append("只列出前 200 行。")
+        return "\n".join(lines)
+    finally:
+        conn.close()
+
+
+def search_sheet_hits(name: str, rows: list, terms: list[str]) -> list[str]:
+    found = []
+    folded = [term.casefold() for term in terms]
+    for row_no, row in enumerate(rows, 1):
+        for col, cell in enumerate(row):
+            text = "" if cell is None else str(cell)
+            if any(term in text.casefold() for term in folded):
+                found.append("%s!%s%d %s" % (name, column_label(col), row_no, clip_line(text, 80)))
+    return found
+
+
+EXCEL_SCRIPT = r"""
+import json, sys
+sys.path.insert(0, sys.argv[1])
+import openpyxl
+book = openpyxl.load_workbook(sys.argv[2], read_only=True, data_only=True)
+out = {"sheets": [], "hidden": 0, "hidden_names": []}
+for sheet in book.worksheets:
+    if sheet.sheet_state != "visible":
+        out["hidden"] += 1
+        out["hidden_names"].append(sheet.title)
+        continue
+    rows = []
+    for index, row in enumerate(sheet.iter_rows(values_only=True)):
+        if index >= 100000:
+            break
+        rows.append(list(row))
+    out["sheets"].append({"name": sheet.title, "rows": rows})
+book.close()
+sys.stdout.write(json.dumps(out, ensure_ascii=False, default=str))
+"""
+
+
+def load_excel_book(path: Path, timeout: int) -> dict:
+    if not docs_installed():
+        raise DocumentError(DOC_COMPONENT_MISSING)
+    proc = subprocess.run(
+        [python_exe(), "-I", "-X", "utf8", "-c", EXCEL_SCRIPT, str(vendor_dir()), str(path)],
+        capture_output=True,
+        timeout=max(timeout, 60),
+        env=scrub_env(dict(os.environ)),
+        creationflags=subprocess.CREATE_NO_WINDOW,
+    )
+    if proc.returncode != 0:
+        detail = proc.stderr.decode("utf-8", errors="replace").strip().splitlines()
+        raise DocumentError("无法读取表格：%s" % (detail[-1][:200] if detail else "未知错误"))
+    return json.loads(proc.stdout.decode("utf-8"))
+
+
+def _sheet_rows(book: dict, sheet: str, range_text: str) -> tuple[list, list] | str:
+    if sheet in book.get("hidden_names", []):
+        return "隐藏工作表不读取"
+    chosen = None
+    for item in book.get("sheets", []):
+        if item["name"] == sheet or not sheet:
+            chosen = item
+            break
+    if chosen is None:
+        return "没有这张工作表"
+    rows = chosen["rows"]
+    if range_text:
+        matched = re.fullmatch(r"([A-Za-z]+)(\d+):([A-Za-z]+)(\d+)", range_text)
+        if not matched:
+            return "区域无效"
+        left, top = column_index(matched.group(1)), int(matched.group(2))
+        right, bottom = column_index(matched.group(3)), int(matched.group(4))
+        sliced = []
+        for row in rows[top - 1:bottom]:
+            sliced.append([row[col] if col < len(row) else None for col in range(left, right + 1)])
+        rows = sliced
+    if not rows:
+        return "表是空的"
+    headers = [("" if cell is None else str(cell).strip()) or ("列%d" % (index + 1)) for index, cell in enumerate(rows[0])]
+    return headers, rows[1:]
+
+
+def read_csv_table(path: Path) -> tuple[list, list]:
+    text = decode_file_bytes(path.read_bytes())
+    rows = list(csv_rows(text))
+    if not rows:
+        return [], []
+    return rows[0], rows[1:]
+
+
+def csv_rows(text: str):
+    import csv
+    return csv.reader(io.StringIO(text))
+
+
+def parse_table(body: str) -> tuple[str, str, str, str] | None:
+    left, sep, sql = body.partition("|")
+    if not sep or not sql.strip():
+        return None
+    left = left.strip().strip("\"'")
+    matched = re.search(
+        r"#(?P<sheet>[^!#]+?)(?:!(?P<c1>[A-Za-z]+)(?P<r1>\d+):(?P<c2>[A-Za-z]+)(?P<r2>\d+))?$",
+        left,
+    )
+    if matched:
+        path = left[:matched.start()].strip()
+        sheet = matched.group("sheet").strip()
+        if matched.group("c1"):
+            span = "%s%s:%s%s" % (matched.group("c1"), matched.group("r1"), matched.group("c2"), matched.group("r2"))
+        else:
+            span = ""
+    else:
+        path, sheet, span = left, "", ""
+    if not path:
+        return None
+    return path, sheet, span, sql.strip()
+
+
+def classify_table(body: str, cwd: Path, roots: list[Path]) -> tuple[str, str]:
+    parsed = parse_table(body)
+    if not parsed:
+        return "block", "TABLE 需要“文件 | SELECT …”"
+    return classify_outline(parsed[0], cwd, roots)
+
+
+def table_result(directive: Directive, rt: Runtime, started: float) -> ExecResult:
+    parsed = parse_table(directive.body)
+    if not parsed:
+        return ExecResult(1, "TABLE 需要“文件 | SELECT …”", time.perf_counter() - started)
+    path, sheet, span, sql = parsed
+    target = outline_target(path, rt.cwd)
+    suffix = target.suffix.lower()
+    try:
+        if suffix == ".csv":
+            headers, data = read_csv_table(target)
+        elif suffix in EXCEL_EXTS:
+            book = load_excel_book(target, rt.timeout)
+            loaded = _sheet_rows(book, sheet, span)
+            if isinstance(loaded, str):
+                return ExecResult(1, loaded, time.perf_counter() - started)
+            headers, data = loaded
+        else:
+            return ExecResult(1, "TABLE 只接受 CSV 或 Excel。", time.perf_counter() - started)
+    except DocumentError as exc:
+        return ExecResult(1, str(exc), time.perf_counter() - started)
+    except OSError:
+        return ExecResult(1, "无法读取表格", time.perf_counter() - started)
+    if not headers:
+        return ExecResult(1, "表是空的", time.perf_counter() - started)
+    if not span and suffix in EXCEL_EXTS:
+        header_at = detect_header([headers] + data)
+        if header_at:
+            headers = [("" if cell is None else str(cell).strip()) or ("列%d" % (index + 1)) for index, cell in enumerate(data[header_at - 1])]
+            data = data[header_at:]
+    return paged_result(query_table(headers, data, sql), rt, started, "查询", False)
+
+
 def outline_result(directive: Directive, rt: Runtime, started: float) -> ExecResult:
     target = outline_target(directive.body, rt.cwd)
+    if target.is_file() and target.suffix.lower() in EXCEL_EXTS:
+        try:
+            book = load_excel_book(target, rt.timeout)
+        except DocumentError as exc:
+            return ExecResult(1, str(exc), time.perf_counter() - started)
+        sheets = [(item["name"], item["rows"]) for item in book.get("sheets", [])]
+        text = format_workbook(sheets, int(book.get("hidden") or 0))
+        return paged_result(text, rt, started, "概况", True)
     if target.is_file() and target.suffix.lower() in DOC_EXTS:
         text, error = load_file(str(target), rt.cwd, rt.roots, cache=rt.docs, timeout=rt.timeout)
         if error:
@@ -2839,6 +3213,27 @@ def task_with_outline(task: str, rt: Runtime) -> str:
     reply = respond("OUTLINE[%s]: ." % rt.session, scoped, real_execute, lambda *_: False)
     rt.step = scoped.step
     return task + "\n\n" + reply.payload if reply.payload else task
+
+
+def excel_region_result(spec: dict, rt: Runtime, started: float) -> ExecResult:
+    target = outline_target(spec["path"], rt.cwd)
+    try:
+        book = load_excel_book(target, rt.timeout)
+    except DocumentError as exc:
+        return ExecResult(1, str(exc), time.perf_counter() - started)
+    if spec["sheet"] in book.get("hidden_names", []):
+        return ExecResult(1, "隐藏工作表不读取", time.perf_counter() - started)
+    rows = None
+    for item in book.get("sheets", []):
+        if item["name"] == spec["sheet"]:
+            rows = item["rows"]
+            break
+    if rows is None:
+        return ExecResult(1, "没有这张工作表", time.perf_counter() - started)
+    text, error = format_region(rows, spec["c1"], spec["r1"], spec["c2"], spec["r2"])
+    if error:
+        return ExecResult(1, error, time.perf_counter() - started)
+    return ExecResult(0, text or "", time.perf_counter() - started)
 
 
 def real_execute(directive: Directive, rt: Runtime) -> ExecResult:
@@ -2868,6 +3263,8 @@ def real_execute(directive: Directive, rt: Runtime) -> ExecResult:
         return outline_result(directive, rt, started)
     if directive.kind == "FIND":
         return find_result(directive, rt, started)
+    if directive.kind == "TABLE":
+        return table_result(directive, rt, started)
     spec = parse_read_spec(directive.body)
     if spec is None:
         return ExecResult(1, "READ_FILE 缺少路径", time.perf_counter() - started)
@@ -2880,6 +3277,10 @@ def real_execute(directive: Directive, rt: Runtime) -> ExecResult:
             number_lines=spec["start"] is not None,
             range_start=spec["start"], range_end=spec["end"],
         )
+    if spec["type"] == "excel":
+        return excel_region_result(spec, rt, started)
+    if Path(spec["path"]).suffix.lower() in EXCEL_EXTS and spec["start"] is None:
+        return outline_result(Directive("OUTLINE", spec["path"], directive.raw), rt, started)
     text, error = load_file(
         spec["path"], rt.cwd, rt.roots, allow_outside=directive.confirmed,
         cache=rt.docs, timeout=rt.timeout,

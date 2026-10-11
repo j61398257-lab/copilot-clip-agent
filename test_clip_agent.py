@@ -11,6 +11,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 import clip_agent
+import install_deps
 
 
 SESSION = "K7Q2"
@@ -1420,6 +1421,134 @@ class NavTests(unittest.TestCase):
         )
         self.assertIn("违约金甲", both)
         self.assertIn("违约金乙", both)
+
+
+class TableTests(unittest.TestCase):
+    def test_sheet_profile_header_stats_and_hidden(self):
+        rows = [
+            ["销售月报", None, None],
+            [None, None, None],
+            ["产品", "地区", "金额"],
+            ["甲", "华东", 10],
+            ["甲", "华东", 20],
+            ["乙", "华北", 5],
+            ["甲", "华南", "001"],
+        ]
+        text = clip_agent.format_sheet("Sheet1", rows)
+        self.assertIn("表头在第 3 行", text)
+        self.assertIn("合计 35", text)
+        self.assertIn("华东×2", text)
+        self.assertIn("文本数字 1 个", text)
+        self.assertIn("甲", text)
+        book = clip_agent.format_workbook([("Sheet1", rows)], 1)
+        self.assertIn("另有 1 张隐藏工作表", book)
+        self.assertNotIn("机密数字", book)
+        small = clip_agent.format_sheet("小表", [["名称", "数量"], ["甲", 2]])
+        self.assertIn("全表", small)
+        self.assertIn("甲", small)
+
+    def test_region_has_letters_and_limits_cells(self):
+        text, error = clip_agent.format_region([["产品", "金额"], ["甲", 10]], "A", 1, "B", 2)
+        self.assertEqual(error, "")
+        self.assertIn("A", text)
+        self.assertIn("B", text)
+        self.assertIn("1", text)
+        self.assertIn("甲", text)
+        _text, error = clip_agent.format_region([["x"]], "A", 1, "AY", 50)
+        self.assertIn("2000", error)
+        hits = clip_agent.search_sheet_hits("Sheet1", [["产品"], ["违约金"]], ["违约金"])
+        self.assertIn("Sheet1!A2", hits[0])
+
+    def test_table_query_matches_known_total_and_rejects_writes(self):
+        headers = ["产品", "地区", "金额"]
+        rows = [["甲", "华东", 10], ["甲", "华东", 20], ["乙", "华北", 5]]
+        sql = "SELECT 产品, SUM(金额) AS 合计 FROM t WHERE 地区 = '华东' GROUP BY 产品 ORDER BY 合计 DESC"
+        text = clip_agent.query_table(headers, rows, sql)
+        self.assertIn("甲", text)
+        self.assertIn("30", text)
+        self.assertNotIn("乙", text)
+        for statement in (
+            "PRAGMA table_info(t)",
+            "ATTACH DATABASE ':memory:' AS extra",
+            "INSERT INTO t VALUES ('丙', '华东', 1)",
+        ):
+            denied = clip_agent.query_table(headers, rows, statement)
+            self.assertIn("只允许 SELECT", denied)
+        sneaky = clip_agent.query_table(headers, rows, "SELECT load_extension('x')")
+        self.assertTrue("失败" in sneaky or "拒绝" in sneaky)
+        self.assertIn("产品", sneaky)
+        missing = clip_agent.query_table(headers, rows, "SELECT 不存在 FROM t")
+        self.assertIn("列名", missing)
+        self.assertIn("产品", missing)
+
+    def test_csv_table_directive(self):
+        tmp = Path(tempfile.mkdtemp())
+        root = tmp / "work"
+        root.mkdir()
+        (root / "销售.csv").write_text("产品,地区,金额\n甲,华东,10\n甲,华东,20\n乙,华北,5\n", encoding="utf-8")
+        runtime = make_runtime(root)
+        rendered = clip_agent.handle_text(
+            "TABLE[K7Q2]: 销售.csv | SELECT 产品, SUM(金额) AS 合计 FROM t WHERE 地区 = '华东' GROUP BY 产品",
+            runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        self.assertIn("30", rendered)
+        self.assertNotIn("乙", rendered)
+
+
+class OfficeIntegrationTests(unittest.TestCase):
+    def setUp(self):
+        if not clip_agent.docs_installed():
+            self.skipTest("未安装文档组件")
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name).resolve()
+        self.runtime = make_runtime(self.root)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_real_docx_and_xlsx(self):
+        import openpyxl
+        docx, _xlsx = install_deps.sample_office_files(self.root)
+        rendered = clip_agent.handle_text(
+            "READ_FILE[K7Q2]: %s" % docx.name,
+            self.runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        self.assertIn("自检", rendered)
+        self.assertNotIn("Traceback", rendered)
+        book = openpyxl.Workbook()
+        sheet = book.active
+        sheet.title = "Sheet1"
+        sheet.append(["产品", "地区", "金额"])
+        sheet.append(["甲", "华东", 10])
+        sheet.append(["甲", "华东", 20])
+        hidden = book.create_sheet("秘密")
+        hidden.sheet_state = "hidden"
+        hidden["A1"] = "机密数字"
+        book.save(self.root / "销售.xlsx")
+        book.close()
+        outline = clip_agent.handle_text(
+            "OUTLINE[K7Q2]: 销售.xlsx",
+            self.runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        self.assertIn("隐藏", outline)
+        self.assertNotIn("机密数字", outline)
+        self.assertIn("30", outline)
+        region = clip_agent.handle_text(
+            "READ_FILE[K7Q2]: 销售.xlsx#Sheet1!A1:B2",
+            self.runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        self.assertIn("甲", region)
+        self.assertNotIn("机密数字", region)
+        blocked = clip_agent.handle_text(
+            "READ_FILE[K7Q2]: 销售.xlsx#秘密!A1:A1",
+            self.runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        self.assertIn("隐藏", blocked)
+        table = clip_agent.handle_text(
+            "TABLE[K7Q2]: 销售.xlsx#Sheet1 | SELECT SUM(金额) AS 合计 FROM t",
+            self.runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        self.assertIn("30", table)
 
 
 class DocTests(unittest.TestCase):
