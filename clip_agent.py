@@ -58,6 +58,13 @@ MUTEX_NAME = "Local\\CopilotClipAgent"
 EVENT_SOURCE = "CopilotClipAgent"
 TOOL_DIR = Path(__file__).resolve().parent
 SAVED_WORKDIR = TOOL_DIR / "last_workdir.txt"
+DOC_EXTS = {".docx", ".pdf", ".pptx", ".html", ".htm", ".epub", ".msg", ".ipynb"}
+EXCEL_EXTS = {".xlsx", ".xls", ".xlsm"}
+OFFICE_EXTS = DOC_EXTS | EXCEL_EXTS
+DOC_COMPONENT_MISSING = "未安装文档组件，请双击“安装文档组件.cmd”；也可以直接把原文件上传给 Copilot。"
+_PAGE_MARK = re.compile(r"^\[第 (\d+) 页\]$")
+_TOC_LINE = re.compile(r"(?:\.{2,}|…+)\s*\d+\s*$|#_Toc\d+")
+_PAGE_NO = re.compile(r"^(?:\d+|-\s*\d+\s*-|第\s*\d+\s*页)$")
 
 PATH_COMMANDS = {
     "get-childitem", "gci", "dir", "ls",
@@ -1521,6 +1528,28 @@ class ExecResult:
     footer: str = ""
 
 
+class DocCache:
+    def __init__(self, limit: int = 10) -> None:
+        self.limit = limit
+        self._items: dict[tuple, tuple[str, str]] = {}
+        self._order: list[tuple] = []
+
+    def _key(self, path: Path) -> tuple:
+        stat = path.stat()
+        return (str(path.resolve()), stat.st_mtime_ns, stat.st_size)
+
+    def get(self, path: Path) -> tuple[str, str] | None:
+        return self._items.get(self._key(path))
+
+    def put(self, path: Path, text: str, note: str) -> None:
+        key = self._key(path)
+        if key not in self._items:
+            self._order.append(key)
+        self._items[key] = (text, note)
+        while len(self._order) > self.limit:
+            self._items.pop(self._order.pop(0), None)
+
+
 @dataclass
 class Runtime:
     mode: str
@@ -1538,6 +1567,7 @@ class Runtime:
     host: str
     step: int = 0
     brief: str = ""
+    docs: DocCache = field(default_factory=DocCache)
 
 
 def short_command(text: str) -> str:
@@ -1804,6 +1834,14 @@ def hidden_console() -> dict:
     return {"startupinfo": info, "creationflags": subprocess.CREATE_NEW_CONSOLE}
 
 
+def vendor_dir() -> Path:
+    return TOOL_DIR / "vendor" / ("py%d%d" % sys.version_info[:2])
+
+
+def docs_installed() -> bool:
+    return (vendor_dir() / "markitdown" / "__init__.py").is_file()
+
+
 def python_exe() -> str:
     exe = Path(sys.executable)
     if exe.name.lower() == "pythonw.exe" and exe.with_name("python.exe").is_file():
@@ -1931,7 +1969,196 @@ def decode_file_bytes(data: bytes) -> str:
         return data.decode("gb18030", errors="replace")
 
 
-def load_file(token: str, cwd: Path, roots: list[Path], allow_outside: bool = False) -> tuple[str | None, str]:
+CONVERT_SCRIPT = r"""
+import sys
+sys.path.insert(0, sys.argv[1])
+path = sys.argv[2]
+try:
+    if path.lower().endswith(".pdf"):
+        import pdfplumber
+        parts = []
+        with pdfplumber.open(path) as pdf:
+            for index, page in enumerate(pdf.pages, 1):
+                parts.append("[第 %d 页]\n%s" % (index, page.extract_text() or ""))
+        sys.stdout.write("\n\n".join(parts))
+    else:
+        from markitdown import MarkItDown
+        text = MarkItDown(enable_plugins=False).convert_local(path).markdown or ""
+        sys.stdout.write(text)
+except Exception as exc:
+    sys.stderr.write("%s: %s" % (exc.__class__.__name__, exc))
+    raise SystemExit(2)
+"""
+
+
+class DocumentError(Exception):
+    pass
+
+
+def convert_argv(path: Path) -> list[str]:
+    return [python_exe(), "-I", "-X", "utf8", "-c", CONVERT_SCRIPT, str(vendor_dir()), str(path)]
+
+
+def conversion_message(code: int, stderr: str, stdout: str, suffix: str) -> str | None:
+    blob = (stderr + "\n" + stdout).lower()
+    if any(word in blob for word in ("password", "encrypted", "decrypt", "protected", "sensitivity", "密码", "加密")):
+        return "文件受保护，无法转换"
+    if "no module named" in blob or "modulenotfounderror" in blob:
+        return DOC_COMPONENT_MISSING
+    if suffix == ".pdf":
+        body = re.sub(r"\[第 \d+ 页\]", "", stdout)
+        if not body.strip():
+            return "没有可提取的文字，请直接上传原文件"
+    if code != 0:
+        detail = stderr.strip().splitlines()
+        return "无法转换：%s" % (detail[-1][:200] if detail else "未知错误")
+    return None
+
+
+def _edge_text(lines: list[str], first: bool) -> str | None:
+    for line in lines if first else reversed(lines):
+        if line.strip():
+            return line.strip()
+    return None
+
+
+def _drop_edge(lines: list[str], first: bool, repeated: set[str]) -> tuple[list[str], int]:
+    indexes = range(len(lines)) if first else range(len(lines) - 1, -1, -1)
+    for index in indexes:
+        text = lines[index].strip()
+        if not text:
+            continue
+        if text in repeated or _PAGE_NO.match(text):
+            return lines[:index] + lines[index + 1:], 1
+        return lines, 0
+    return lines, 0
+
+
+def _strip_toc(text: str) -> tuple[str, int]:
+    lines = text.splitlines()
+    kept: list[str] = []
+    index = 0
+    removed = 0
+    while index < len(lines):
+        if lines[index].strip() and _TOC_LINE.search(lines[index]):
+            run = index
+            while run < len(lines) and (not lines[run].strip() or _TOC_LINE.search(lines[run])):
+                run += 1
+            hits = [line for line in lines[index:run] if _TOC_LINE.search(line)]
+            if len(hits) >= 3:
+                removed += len(hits)
+                index = run
+                continue
+        kept.append(lines[index])
+        index += 1
+    return "\n".join(kept), removed
+
+
+def _collapse_blanks(text: str) -> tuple[str, bool]:
+    collapsed = re.sub(r"\n{3,}", "\n\n", text).strip()
+    return collapsed, collapsed != text.strip()
+
+
+def clean_document(text: str, suffix: str) -> tuple[str, str]:
+    removed_edges = 0
+    body = text
+    if suffix == ".pdf":
+        pages: list[tuple[str, list[str]]] = []
+        number: str | None = None
+        current: list[str] = []
+        for line in text.splitlines():
+            matched = _PAGE_MARK.match(line.strip())
+            if matched:
+                if number is not None:
+                    pages.append((number, current))
+                number = matched.group(1)
+                current = []
+            else:
+                current.append(line)
+        if number is not None:
+            pages.append((number, current))
+        if pages:
+            headers, footers = [], []
+            for _, lines in pages:
+                head = _edge_text(lines, True)
+                foot = _edge_text(lines, False)
+                if head:
+                    headers.append(head)
+                if foot and foot != head:
+                    footers.append(foot)
+            threshold = len(pages) / 2
+            drop_head = {line for line, count in Counter(headers).items() if count > threshold}
+            drop_foot = {line for line, count in Counter(footers).items() if count > threshold}
+            chunks = []
+            for page_no, lines in pages:
+                lines, dropped = _drop_edge(lines, True, drop_head)
+                removed_edges += dropped
+                lines, dropped = _drop_edge(lines, False, drop_foot)
+                removed_edges += dropped
+                chunks.append("[第 %s 页]\n%s" % (page_no, "\n".join(lines).strip()))
+            body = "\n\n".join(chunks)
+    body, toc_rows = _strip_toc(body) if suffix != ".pdf" else (body, 0)
+    body, collapsed = _collapse_blanks(body)
+    notes = []
+    if removed_edges:
+        notes.append("重复页眉页脚 %d 处" % removed_edges)
+    if toc_rows:
+        notes.append("目录 %d 行" % toc_rows)
+    if collapsed:
+        notes.append("连续空行")
+    note = "已去掉：" + "、".join(notes) + "。" if notes else ""
+    return body, note
+
+
+def convert_document(path: Path, timeout: int) -> str:
+    if not docs_installed():
+        raise DocumentError(DOC_COMPONENT_MISSING)
+    try:
+        proc = subprocess.run(
+            convert_argv(path),
+            capture_output=True,
+            timeout=max(timeout, 60),
+            env=scrub_env(dict(os.environ)),
+            creationflags=subprocess.CREATE_NO_WINDOW,
+        )
+    except subprocess.TimeoutExpired:
+        raise DocumentError("转换超时")
+    stdout = proc.stdout.decode("utf-8", errors="replace")
+    stderr = proc.stderr.decode("utf-8", errors="replace")
+    if proc.returncode != 0:
+        raise DocumentError(conversion_message(proc.returncode, stderr, stdout, path.suffix.lower()) or "无法转换")
+    if len(stdout) > 8_000_000:
+        stdout = stdout[:8_000_000] + "\n[转换结果超过上限，已截断]"
+    return stdout
+
+
+def read_office(path: Path, cache: DocCache, timeout: int) -> tuple[str | None, str]:
+    cached = cache.get(path)
+    if cached is None:
+        try:
+            raw = convert_document(path, timeout)
+        except DocumentError as exc:
+            return None, str(exc)
+        text, note = clean_document(raw, path.suffix.lower())
+        empty = conversion_message(0, "", text, path.suffix.lower())
+        if empty and "没有可提取" in empty:
+            return None, empty
+        cache.put(path, text, note)
+    else:
+        text, note = cached
+    if note:
+        text = note + "\n\n" + text
+    return text, ""
+
+
+def load_file(
+    token: str,
+    cwd: Path,
+    roots: list[Path],
+    allow_outside: bool = False,
+    cache: DocCache | None = None,
+    timeout: int = 120,
+) -> tuple[str | None, str]:
     ok, why = check_path(token, cwd, roots)
     if not ok and not (allow_outside and why == "路径超出允许目录"):
         return None, why
@@ -1946,6 +2173,12 @@ def load_file(token: str, cwd: Path, roots: list[Path], allow_outside: bool = Fa
         return None, "文件不存在"
     if path_is_sensitive(resolved) or mentions_sensitive(token):
         return None, "敏感文件"
+    suffix = resolved.suffix.lower()
+    if suffix in {".doc", ".ppt"}:
+        newer = "docx" if suffix == ".doc" else "pptx"
+        return None, "旧格式 %s 无法转换，请另存为 .%s，或直接上传原文件。" % (suffix, newer)
+    if suffix in OFFICE_EXTS and not docs_installed():
+        return None, DOC_COMPONENT_MISSING
     if not allow_outside and not inside_any(resolved, roots):
         return None, "路径超出允许目录"
     try:
@@ -1954,6 +2187,8 @@ def load_file(token: str, cwd: Path, roots: list[Path], allow_outside: bool = Fa
         return None, "无法读取文件"
     if size > MAX_FILE_BYTES:
         return None, "文件超过 10MB"
+    if suffix in DOC_EXTS:
+        return read_office(resolved, cache or DocCache(), timeout)
     data = resolved.read_bytes()
     if b"\x00" in data and not data.startswith((b"\xff\xfe", b"\xfe\xff")):
         return None, "二进制文件，已拒绝读取。"
@@ -2353,20 +2588,26 @@ def page_ranges(lines: list[str], page_chars: int) -> list[tuple[int, int]]:
     return pages
 
 
-def outline_result(directive: Directive, rt: Runtime, started: float) -> ExecResult:
-    text = project_outline(outline_target(directive.body, rt.cwd), rt.roots)
-    pages = page_ranges(redact(text)[0].splitlines(), max(600, rt.max_chars - 800))
+def paged_result(text: str, rt: Runtime, started: float, label: str, number_single: bool) -> ExecResult:
+    elapsed = time.perf_counter() - started
+    lines = redact(text)[0].splitlines() or [""]
+    pages = page_ranges(lines, max(600, rt.max_chars - 800))
     if len(pages) == 1:
-        return ExecResult(0, text, time.perf_counter() - started)
-    footer = "（概览共 %d 页，这是第 1 页。下一页发 READ_FILE[%s]: result:%d#L%d-%d" % (
-        len(pages), rt.session, rt.step, pages[1][0], pages[1][1],
+        return ExecResult(0, text, elapsed, number_lines=number_single)
+    footer = "（%s共 %d 页，这是第 1 页。下一页发 READ_FILE[%s]: result:%d#L%d-%d" % (
+        label, len(pages), rt.session, rt.step, pages[1][0], pages[1][1],
     )
     if len(pages) > 2:
         footer += "；再往后各页依次是 " + "、".join("#L%d-%d" % page for page in pages[2:])
     return ExecResult(
-        0, text, time.perf_counter() - started, number_lines=True,
+        0, text, elapsed, number_lines=True,
         range_start=pages[0][0], range_end=pages[0][1], footer=footer + "）",
     )
+
+
+def outline_result(directive: Directive, rt: Runtime, started: float) -> ExecResult:
+    text = project_outline(outline_target(directive.body, rt.cwd), rt.roots)
+    return paged_result(text, rt, started, "概览", False)
 
 
 def task_with_outline(task: str, rt: Runtime) -> str:
@@ -2418,10 +2659,15 @@ def real_execute(directive: Directive, rt: Runtime) -> ExecResult:
             number_lines=spec["start"] is not None,
             range_start=spec["start"], range_end=spec["end"],
         )
-    text, error = load_file(spec["path"], rt.cwd, rt.roots, allow_outside=directive.confirmed)
+    text, error = load_file(
+        spec["path"], rt.cwd, rt.roots, allow_outside=directive.confirmed,
+        cache=rt.docs, timeout=rt.timeout,
+    )
     if error:
         return ExecResult(1, error, time.perf_counter() - started)
     assert text is not None
+    if Path(spec["path"]).suffix.lower() in DOC_EXTS and spec["start"] is None:
+        return paged_result(text, rt, started, "文档", True)
     return ExecResult(
         0, text, time.perf_counter() - started, number_lines=True,
         range_start=spec["start"], range_end=spec["end"],

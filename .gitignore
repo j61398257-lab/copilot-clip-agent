@@ -3,3 +3,11 @@ __pycache__/
 *.pyc
 COPILOT_BRIEFING.md
 last_workdir.txt
+settings.json
+vendor/
+tools/
+upload/
+backup/
+sessions/
+docs-deps-win64.zip
+codegraph-win32-x64-*.zip

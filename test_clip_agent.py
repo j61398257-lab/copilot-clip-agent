@@ -1247,6 +1247,102 @@ class EndToEndTests(unittest.TestCase):
                 agent.close_pipes()
 
 
+class OfficeComponentTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.root = self.tmp / "work"
+        self.root.mkdir()
+        self.runtime = make_runtime(self.root)
+        self.original = clip_agent.docs_installed
+        clip_agent.docs_installed = lambda: False
+
+    def tearDown(self):
+        clip_agent.docs_installed = self.original
+
+    def test_office_file_without_components_explains(self):
+        (self.root / "合同.docx").write_bytes(b"PK\x03\x04not-real")
+        rendered = clip_agent.handle_text(
+            "READ_FILE[K7Q2]: 合同.docx",
+            self.runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        self.assertIn("未安装文档组件", rendered)
+        self.assertNotIn("Traceback", rendered)
+        self.assertNotIn("D:\\", rendered)
+
+    def test_pdf_noise_and_word_toc_are_removed(self):
+        pdf = "\n\n".join(
+            "[第 %d 页]\n公司机密\n正文%d\n- %d -" % (number, number, number) for number in (1, 2, 3)
+        )
+        cleaned, note = clip_agent.clean_document(pdf, ".pdf")
+        self.assertIn("[第 1 页]", cleaned)
+        self.assertIn("正文1", cleaned)
+        self.assertNotIn("公司机密", cleaned)
+        self.assertNotIn("- 1 -", cleaned)
+        self.assertIn("页眉", note)
+        word = "前言\n\n第一章 .......... 1\n第二章 .......... 4\n第三章 .......... 9\n\n正文\n\n\n\n结尾\n"
+        cleaned, note = clip_agent.clean_document(word, ".docx")
+        self.assertIn("前言", cleaned)
+        self.assertIn("正文", cleaned)
+        self.assertIn("结尾", cleaned)
+        self.assertNotIn("第一章", cleaned)
+        self.assertIn("目录", note)
+        self.assertIn("连续空行", note)
+        self.assertNotIn("\n\n\n", cleaned)
+
+    def test_protected_scanned_and_legacy_formats(self):
+        self.assertIn("受保护", clip_agent.conversion_message(2, "Error: file is encrypted", "", ".docx"))
+        self.assertIn("没有可提取的文字", clip_agent.conversion_message(0, "", "[第 1 页]\n\n[第 2 页]\n", ".pdf"))
+        (self.root / "旧.doc").write_bytes(b"\xd0\xcf\x11\xe0")
+        rendered = clip_agent.handle_text(
+            "READ_FILE[K7Q2]: 旧.doc",
+            self.runtime, clip_agent.real_execute, lambda *_: False,
+        )
+        self.assertIn("另存为 .docx", rendered)
+
+    def test_convert_argv_stays_offline(self):
+        argv = clip_agent.convert_argv(Path("合同.pdf"))
+        self.assertEqual(argv[1], "-I")
+        script = argv[argv.index("-c") + 1]
+        self.assertIn("enable_plugins=False", script)
+        self.assertIn("convert_local", script)
+        self.assertNotIn("llm_client", script)
+        self.assertNotIn("docintel", script)
+        self.assertEqual(argv[-1], "合同.pdf")
+        self.assertIn("vendor", argv[-2].replace("/", "\\").lower())
+
+    def test_converted_document_is_cached_and_paged(self):
+        calls = []
+
+        def fake_convert(path, timeout):
+            calls.append(Path(path).name)
+            return "\n\n".join("第%d段%s" % (index, "甲" * 60) for index in range(30))
+
+        original = clip_agent.convert_document
+        clip_agent.convert_document = fake_convert
+        clip_agent.docs_installed = lambda: True
+        try:
+            (self.root / "合同.docx").write_bytes(b"PK\x03\x04fake")
+            runtime = make_runtime(self.root, max_chars=1800)
+            first = clip_agent.handle_text(
+                "READ_FILE[K7Q2]: 合同.docx",
+                runtime, clip_agent.real_execute, lambda *_: False,
+            )
+            self.assertIn("第0段", first)
+            self.assertIn("文档共", first)
+            self.assertLessEqual(len(first), 1800)
+            self.assertNotIn("Traceback", first)
+            pages = re.findall(r"READ_FILE\[K7Q2\]: result:1#L\d+-\d+", first)
+            self.assertTrue(pages)
+            second = clip_agent.handle_text(
+                "READ_FILE[K7Q2]: 合同.docx",
+                runtime, clip_agent.real_execute, lambda *_: False,
+            )
+            self.assertIn("第0段", second)
+            self.assertEqual(calls, ["合同.docx"])
+        finally:
+            clip_agent.convert_document = original
+
+
 class DocTests(unittest.TestCase):
     def test_prompt_file_matches_builtin_template(self):
         text = Path(__file__).with_name("COPILOT_SYSTEM_PROMPT.md").read_text(encoding="utf-8")
