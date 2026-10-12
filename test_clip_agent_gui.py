@@ -22,6 +22,8 @@ class TemplateTests(unittest.TestCase):
         self.assertIn("READ_FILE", readonly)
         self.assertNotIn("Python", readonly)
         self.assertIn("Python", tiered)
+        auto = gui.task_templates("auto")["分析表格"]
+        self.assertIn("Python", auto)
 
     def test_batch_summary_counts_decisions(self):
         items = [

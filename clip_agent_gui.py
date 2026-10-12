@@ -28,13 +28,13 @@ UI_FONT = ("Microsoft YaHei UI", 10)
 BOLD_FONT = ("Microsoft YaHei UI", 10, "bold")
 TITLE_FONT = ("Microsoft YaHei UI", 15, "bold")
 CODE_FONT = ("Consolas", 10)
-MODE_NAMES = {"readonly": "只读严格", "tiered": "分级确认"}
+MODE_NAMES = {"readonly": "只读严格", "tiered": "分级确认", "auto": "自动执行"}
 TONES = {"ok": "#1d6b2f", "info": "#333333", "warn": "#9a5b00", "error": "#b3261e"}
 DECISION_NAMES = {"allow": "执行", "block": "拦截", "marker": "拦截", "deny": "拒绝", "skip": "跳过"}
 
 
 def task_templates(mode: str) -> dict[str, str]:
-    if mode == "tiered":
+    if core.mode_can_change(mode):
         table = (
             "请用 Python 分析【表格路径，比如 samples\\sales.csv】：先看列名和前几行，"
             "再按类别汇总数量和金额，找出金额最高的几项，最后用几句话给出结论。"
@@ -221,6 +221,10 @@ class App:
             modes, value="tiered", variable=self.mode,
             text="分级确认：白名单外的命令和 Python 代码逐条弹窗，你点“执行”才运行",
         ).pack(anchor="w", pady=(6, 0))
+        ttk.Radiobutton(
+            modes, value="auto", variable=self.mode,
+            text="自动执行：普通命令、Python 和 PATCH 直接运行，不再逐条确认；高风险操作仍然拒绝",
+        ).pack(anchor="w", pady=(6, 0))
         ttk.Label(frame, text="单条上限").grid(row=4, column=0, sticky="w", pady=(16, 0))
         saved = load_settings()
         self.max_chars = tk.StringVar(value=str(saved.get("max_chars", self.base.max_chars)))
@@ -344,6 +348,14 @@ class App:
             icon="warning", default="no", parent=self.root,
         ):
             return
+        if args.mode == "auto" and not messagebox.askyesno(
+            "确认使用自动执行",
+            "自动执行档会直接运行白名单外的普通命令、Python 代码和 PATCH，不再逐条确认。\n\n"
+            "下载、编码执行、递归删除、关机等高风险操作仍然直接拒绝。允许目录以外的读取也不会自动放行。\n\n"
+            "确定使用自动执行档吗？",
+            icon="warning", default="no", parent=self.root,
+        ):
+            return
         try:
             audit = core.AuditLog(Path(args.log_dir), args.retention_days)
         except OSError as exc:
@@ -361,8 +373,7 @@ class App:
                 pass
         self.janitor = core.ClipboardJanitor()
         self.janitor.start()
-        mode_short = "只读" if args.mode == "readonly" else "分级"
-        self.root.title("Copilot 执行器 [%s] %s" % (mode_short, rt.session))
+        self.root.title("Copilot 执行器 [%s] %s" % (core.mode_short(args.mode), rt.session))
         self.header.set("会话码 %s　·　%s　·　%s" % (rt.session, MODE_NAMES[args.mode], rt.cwd))
         self.step3.configure(text="③ 粘贴 Copilot 回复里的代码块（Ctrl+V 粘贴后自动执行，也可以点“执行”）")
         self.step4.configure(
@@ -382,7 +393,11 @@ class App:
         except OSError as exc:
             self.say("会话已开始，但复制预设提示词失败：%s。请点“复制预设提示词”重试。" % exc, "error")
             return
-        self.say("会话已开始，预设提示词已复制到剪贴板。到 Copilot 对话框粘贴并发送。", "ok")
+        started = "会话已开始，预设提示词已复制到剪贴板。到 Copilot 对话框粘贴并发送。"
+        if rt.python_note:
+            self.say(started + "\n" + rt.python_note, "warn")
+        else:
+            self.say(started, "ok")
 
     def end_session(self, reason: str = "closed") -> bool:
         if self.rt is None:
@@ -483,7 +498,7 @@ class App:
         if self.auto.get():
             self.auto_seen = core.clipboard_sequence()
             self.last_active = time.monotonic()
-            self.say("自动接收已打开。在 Copilot 里复制带会话码的指令即可，只读指令会直接执行。", "ok")
+            self.say("自动接收已打开。只读指令会直接执行。要运行或要修改的指令仍请粘贴到第 ③ 步。", "ok")
 
     def undo_change(self) -> None:
         if self.rt is None:
@@ -697,7 +712,10 @@ class App:
                         if core.looks_like_directives(text, self.rt.session):
                             self.input.delete("1.0", "end")
                             self.input.insert("1.0", text)
-                            self.run_input("auto")
+                            if core.batch_needs_attention(text, self.rt):
+                                self.say("自动接收只执行只读指令。这一批含有要确认、要修改或被拦截的内容，请在第 ③ 步点“执行”。", "warn")
+                            else:
+                                self.run_input("auto")
         finally:
             self.root.after(300, self.poll_auto)
 

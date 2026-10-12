@@ -158,6 +158,19 @@ class ParseTests(unittest.TestCase):
         self.assertIsNone(directives)
         self.assertIn("会话码", error)
 
+    def test_glued_read_file_lines_split(self):
+        text = "READ_FILE[K7Q2]: a.py#L1-10 READ_FILE[K7Q2]: b.py#L1-20"
+        directives, error = clip_agent.parse_batch(text, SESSION, 5)
+        self.assertIsNone(error)
+        self.assertEqual([item.kind for item in directives], ["READ_FILE", "READ_FILE"])
+        self.assertEqual(directives[0].body, "a.py#L1-10")
+        self.assertEqual(directives[1].body, "b.py#L1-20")
+        quoted = 'TOOL[K7Q2]: Select-String -Pattern "READ_FILE[K7Q2]:"'
+        one, error = clip_agent.parse_batch(quoted, SESSION, 5)
+        self.assertIsNone(error)
+        self.assertEqual(len(one), 1)
+        self.assertIn("READ_FILE[K7Q2]:", one[0].body)
+
     def test_read_spec_range(self):
         spec = clip_agent.parse_read_spec(r"result:3#L10-20")
         self.assertEqual(spec["type"], "result")
@@ -214,20 +227,32 @@ class PolicyTests(unittest.TestCase):
             self.assertEqual(decision, "block", command + " -> " + reason)
 
     def test_cd_outside_blocked_in_both_modes(self):
-        for mode in ("readonly", "tiered"):
+        for mode in ("readonly", "tiered", "auto"):
             decision, _ = self.classify("cd ..", mode)
             self.assertEqual(decision, "block", mode)
 
     def test_tiered_confirms_write_but_blocks_high_risk(self):
         decision, _ = self.classify("Set-Content a.txt hello", "tiered")
         self.assertEqual(decision, "confirm")
+        decision, _ = self.classify("Set-Content a.txt hello", "auto")
+        self.assertEqual(decision, "allow")
         decision, _ = self.classify("Remove-Item -Recurse a.txt", "tiered")
+        self.assertEqual(decision, "block")
+        decision, _ = self.classify("Remove-Item -Recurse a.txt", "auto")
         self.assertEqual(decision, "block")
         decision, _ = clip_agent.classify_read(
             str(self.outside / "secret.txt"), "tiered", self.root, [self.root.resolve()],
         )
         self.assertEqual(decision, "confirm")
+        decision, _ = clip_agent.classify_read(
+            str(self.outside / "secret.txt"), "auto", self.root, [self.root.resolve()],
+        )
+        self.assertEqual(decision, "block")
         decision, _ = clip_agent.classify_read(".env", "tiered", self.root, [self.root.resolve()])
+        self.assertEqual(decision, "block")
+        decision, _ = clip_agent.classify_python("print(1)", "auto")
+        self.assertEqual(decision, "allow")
+        decision, _ = clip_agent.classify_python("import os\nos.system('dir')", "auto")
         self.assertEqual(decision, "block")
 
     def test_roots_reject_drive_home_and_windows(self):
@@ -426,6 +451,8 @@ class PythonBlockTests(unittest.TestCase):
             with self.subTest(code=code):
                 decision, reason = clip_agent.classify_python(code, "tiered")
                 self.assertEqual(decision, "block", reason)
+                decision, reason = clip_agent.classify_python(code, "auto")
+                self.assertEqual(decision, "block", reason)
 
     def test_everyday_analysis_code_goes_to_confirmation(self):
         fine = [
@@ -438,6 +465,7 @@ class PythonBlockTests(unittest.TestCase):
         for code in fine:
             with self.subTest(code=code):
                 self.assertEqual(clip_agent.classify_python(code, "tiered")[0], "confirm")
+                self.assertEqual(clip_agent.classify_python(code, "auto")[0], "allow")
 
     def test_runs_in_project_dir_and_project_files_cannot_shadow_stdlib(self):
         (self.root / "data.csv").write_text("名称,数量\n苹果,3\n香蕉,4\n", encoding="utf-8")
@@ -475,7 +503,7 @@ class PythonBlockTests(unittest.TestCase):
             clip_agent.run_python("print(1)", self.root, 30)
         finally:
             subprocess.Popen = original
-        self.assertIn("-I", captured["args"])
+        self.assertEqual(captured["args"][1], clip_agent.python_run_flag())
         self.assertTrue(captured["flags"] & subprocess.CREATE_NO_WINDOW)
         self.assertEqual(Path(captured["args"][0]).name.lower(), "python.exe")
 
@@ -1780,8 +1808,7 @@ class FreedomTests(unittest.TestCase):
         denied = clip_agent.handle_text(missing, self.runtime, clip_agent.real_execute, confirm)
         self.assertIn("出现 0 次", denied)
         self.assertIn(b"value = total", target.read_bytes())
-        twice = (self.root / "app.py").read_text(encoding="utf-8")
-        target.write_text(twice + twice, encoding="utf-8")
+        target.write_text("value = total\nvalue = total\n", encoding="utf-8")
         twice_denied = clip_agent.handle_text(block, self.runtime, clip_agent.real_execute, confirm)
         self.assertIn("出现 2 次", twice_denied)
         target.write_bytes(b"\xef\xbb\xbf" + "value = total\r\n".encode("utf-8"))
@@ -1805,6 +1832,169 @@ class FreedomTests(unittest.TestCase):
         readonly = make_runtime(self.root, mode="readonly")
         blocked = clip_agent.handle_text(block, readonly, clip_agent.real_execute, confirm)
         self.assertIn("只读档不能修改", blocked)
+
+    def test_patch_keeps_line_boundaries_and_refuses_partial_lines(self):
+        target = self.root / "app.py"
+        original = "prefix = value + suffix\nalpha = 1\nbeta = 2\n\ngamma = 3\n"
+        target.write_text(original, encoding="utf-8")
+
+        def block(old, new):
+            return "\n".join([
+                "PATCH[K7Q2]: app.py",
+                "<<<<<<< 查找",
+                old,
+                "=======",
+                new,
+                ">>>>>>> 替换",
+                "END_PATCH",
+            ])
+
+        partial = clip_agent.handle_text(
+            block("value", "value2"), self.runtime, clip_agent.real_execute, lambda *_: True,
+        )
+        self.assertIn("出现 0 次", partial)
+        self.assertNotIn("已修改", partial)
+        self.assertEqual(target.read_text(encoding="utf-8"), original)
+        spanning = clip_agent.handle_text(
+            block("2\n\ngamma", "2"), self.runtime, clip_agent.real_execute, lambda *_: True,
+        )
+        self.assertIn("出现 0 次", spanning)
+        self.assertEqual(target.read_text(encoding="utf-8"), original)
+        deleted = clip_agent.handle_text(
+            "\n".join([
+                "PATCH[K7Q2]: app.py",
+                "<<<<<<< 查找",
+                "beta = 2",
+                "=======",
+                ">>>>>>> 替换",
+                "END_PATCH",
+            ]),
+            self.runtime, clip_agent.real_execute, lambda *_: True,
+        )
+        self.assertIn("已修改", deleted)
+        self.assertEqual(target.read_text(encoding="utf-8"), "prefix = value + suffix\nalpha = 1\n\ngamma = 3\n")
+        target.write_text(original, encoding="utf-8")
+        inserted = clip_agent.handle_text(
+            block("beta = 2", "beta = 2\nbeta = 4"), self.runtime, clip_agent.real_execute, lambda *_: True,
+        )
+        self.assertIn("已修改", inserted)
+        self.assertEqual(
+            target.read_text(encoding="utf-8"),
+            "prefix = value + suffix\nalpha = 1\nbeta = 2\nbeta = 4\n\ngamma = 3\n",
+        )
+
+    def test_patch_refuses_syntax_regression_and_rolls_back_bad_write(self):
+        target = self.root / "app.py"
+        original = "value = 1\n"
+        target.write_bytes(original.encode("utf-8"))
+        broken = "\n".join([
+            "PATCH[K7Q2]: app.py",
+            "<<<<<<< 查找",
+            "value = 1",
+            "=======",
+            "value =",
+            ">>>>>>> 替换",
+            "END_PATCH",
+        ])
+        denied = clip_agent.handle_text(broken, self.runtime, clip_agent.real_execute, lambda *_: True)
+        self.assertIn("语法检查未通过", denied)
+        self.assertNotIn("已修改", denied)
+        self.assertEqual(target.read_bytes(), original.encode("utf-8"))
+        self.assertFalse((clip_agent.backup_root() / self.runtime.session).exists())
+
+        valid = "\n".join([
+            "PATCH[K7Q2]: app.py",
+            "<<<<<<< 查找",
+            "value = 1",
+            "=======",
+            "value = 2",
+            ">>>>>>> 替换",
+            "END_PATCH",
+        ])
+        calls = {"n": 0}
+        real = clip_agent._file_signature
+
+        def fake(path):
+            calls["n"] += 1
+            text, encoding, crlf = real(path)
+            if calls["n"] >= 2:
+                return "def (\n", encoding, crlf
+            return text, encoding, crlf
+
+        clip_agent._file_signature = fake
+        try:
+            rolled = clip_agent.handle_text(valid, self.runtime, clip_agent.real_execute, lambda *_: True)
+        finally:
+            clip_agent._file_signature = real
+        self.assertIn("已恢复原文件", rolled)
+        self.assertNotIn("已修改", rolled)
+        self.assertEqual(target.read_text(encoding="utf-8"), original)
+        self.assertIn("没有可以撤销", clip_agent.undo_last_change(self.runtime))
+
+        created = self.root / "new.py"
+        create = "\n".join([
+            "PATCH[K7Q2]: new.py",
+            "<<<<<<< 查找",
+            "=======",
+            "def (",
+            ">>>>>>> 替换",
+            "END_PATCH",
+        ])
+        failed = clip_agent.handle_text(create, self.runtime, clip_agent.real_execute, lambda *_: True)
+        self.assertIn("语法检查未通过", failed)
+        self.assertFalse(created.exists())
+
+    def test_auto_runs_without_confirm_but_keeps_blocks(self):
+        runtime = make_runtime(self.root, mode="auto")
+        called = []
+
+        def confirm(*_args):
+            raise AssertionError("自动执行不应再询问")
+
+        def executor(directive, runtime):
+            called.append(directive.body)
+            return clip_agent.ExecResult(0, "ok", 0.01)
+
+        done = clip_agent.handle_text("TOOL[K7Q2]: Set-Content a.txt hello", runtime, executor, confirm)
+        self.assertEqual(called, ["Set-Content a.txt hello"])
+        self.assertIn("TOOL", done)
+        self.assertNotIn("BLOCKED", done)
+        blocked = clip_agent.handle_text(
+            "TOOL[K7Q2]: powershell -EncodedCommand QQ", runtime, executor, confirm,
+        )
+        self.assertIn("BLOCKED", blocked)
+        self.assertEqual(called, ["Set-Content a.txt hello"])
+        outside = self.root.parent / "outside.txt"
+        outside.write_text("秘密", encoding="utf-8")
+        read = clip_agent.handle_text("READ_FILE[K7Q2]: %s" % outside, runtime, executor, confirm)
+        self.assertIn("BLOCKED", read)
+        self.assertNotIn("秘密", read)
+        python = clip_agent.handle_text(
+            "PYTHON[K7Q2]:\nprint(1)\nEND_PYTHON", runtime, executor, confirm,
+        )
+        self.assertNotIn("BLOCKED", python)
+        self.assertNotIn("DENIED", python)
+        risky = clip_agent.handle_text(
+            "PYTHON[K7Q2]:\nimport os\nos.system('echo hi')\nEND_PYTHON", runtime, executor, confirm,
+        )
+        self.assertIn("BLOCKED", risky)
+
+    def test_python_env_note_names_a_different_install(self):
+        chosen = r"C:\Python311\python.exe"
+        quiet = clip_agent.describe_python_env(chosen, [
+            ("python", r"C:\Python311\python.exe"),
+            ("py -3", r"c:\python311\pythonw.exe"),
+            ("pip", r"C:\Python311\Lib\site-packages\pip"),
+        ])
+        self.assertEqual(quiet, "")
+        noted = clip_agent.describe_python_env(chosen, [
+            ("py -3", r"C:\Python312\python.exe"),
+            ("pip", r"C:\Python311\Lib\site-packages\pip"),
+        ])
+        self.assertIn(r"C:\Python311\python.exe", noted)
+        self.assertIn("Python312", noted)
+        self.assertNotIn("site-packages", noted)
+        self.assertIn("-P" if __import__("sys").version_info >= (3, 11) else "-I", clip_agent.python_run_flag())
 
     def test_trust_is_exact_and_not_for_deletes(self):
         self.assertFalse(clip_agent.trust_allowed("Remove-Item a.txt"))
@@ -1868,7 +2058,7 @@ class DocTests(unittest.TestCase):
         root = Path(tempfile.gettempdir()).resolve()
         briefs = {
             mode: clip_agent.build_copilot_brief(SESSION, mode, root, [root], 5, 60, 8000, [], ["pandas"])
-            for mode in ("readonly", "tiered")
+            for mode in ("readonly", "tiered", "auto")
         }
         for mode, text in briefs.items():
             with self.subTest(mode=mode):
@@ -1888,6 +2078,10 @@ class DocTests(unittest.TestCase):
         self.assertIn("PYTHON[K7Q2]:", briefs["tiered"])
         self.assertIn("END_PYTHON", briefs["tiered"])
         self.assertIn("pandas", briefs["tiered"])
+        self.assertIn("点“执行”", briefs["tiered"])
+        self.assertIn("PYTHON[K7Q2]:", briefs["auto"])
+        self.assertIn("不再逐条确认", briefs["auto"])
+        self.assertNotIn("点“执行”", briefs["auto"])
         self.assertNotIn("PYTHON[K7Q2]:", briefs["readonly"])
 
 
