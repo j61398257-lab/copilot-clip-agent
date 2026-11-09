@@ -1,45 +1,45 @@
 # SAP ERP 加独立 WMS
 
-没有桥接。WMS 直接调用 SAP。
+一条串行链，没有桥接，也没有第二个 WMS。库位和托盘留在 WMS 里面。openTCS 只是 Fleet Manager 这一层在本实验里的实现。
 
-入库交货 `1800000001`：SAP 只认工厂 `1000` 和库存地点 `FG00`。库位、托盘和上架在 WMS。WMS 向车队派车，车从收货位送到存储位之后，WMS 再调用 SAP 过账收货，移动类型 `101`，物料凭证 `5000000001`。
+入库交货 `1800000001`：SAP 只认工厂 `1000` 和库存地点 `FG00`。WMS 先向 SAP 取交货，自己登记托盘并建上架单，然后才调用 Fleet Manager。车从收货位送到存储位之后，WMS 再调用 SAP 过账收货，移动类型 `101`，物料凭证 `5000000001`。
 
 往下拉过文件列表就能看到图。这些图直接画在页面上。
 
 ## 调用方向
 
 ```mermaid
-flowchart TB
-  SAP["SAP S/4HANA ERP · :4004<br/>工厂 1000 · 库存地点 FG00<br/>不管仓位"]
-  WMS["WMS · OpenWMS<br/>直接调用 SAP<br/>收货位 FGIN/GR/0001/0000/0000<br/>存储位 FGIN/ST/0001/0000/0000"]
-  TCS["openTCS · :55200<br/>订单 INB-1800000001<br/>GoodsReceipt 装货，Storage-01 卸货"]
-  CAR["Vehicle-01<br/>Point-GR 到 Point-Store"]
-  WMS -->|"S2 读取未过账入库交货"| SAP
-  WMS -->|"S5 上架完成后 PostGoodsReceipt"| SAP
-  WMS -->|"F4 派上架"| TCS
-  TCS --> CAR
+flowchart LR
+  SAP["1 SAP ERP<br/>工厂 1000 · 库存地点 FG00"]
+  WMS["2 WMS<br/>库位和托盘在内部"]
+  FM["3 Fleet Manager<br/>本实验用 openTCS"]
+  CAR["4 车辆<br/>Point-GR 到 Point-Store"]
+  SAP --> WMS --> FM --> CAR
   style SAP fill:#d6e6f5,stroke:#0072B2,color:#222
   style WMS fill:#cde8df,stroke:#009E73,color:#222
-  style TCS fill:#f6d2c4,stroke:#D55E00,color:#222
+  style FM fill:#f6d2c4,stroke:#D55E00,color:#222
   style CAR fill:#f3d5e6,stroke:#CC79A7,color:#222
 ```
 
-## 图 1 时序
+返回也是这一条链倒着走：车辆回报 Fleet Manager，Fleet Manager 回报 WMS，WMS 再调用 SAP 过账。
+
+## 时序
 
 ```mermaid
 sequenceDiagram
   participant SAP as SAP ERP
   participant WMS as WMS
-  participant TCS as openTCS
+  participant FM as Fleet Manager
   participant CAR as 车辆
   WMS->>SAP: 查询未过账入库交货
   SAP-->>WMS: 交货 1800000001，工厂 1000，库存地点 FG00
-  Note over WMS: 在收货位登记托盘 4711，创建上架运输单
-  WMS->>TCS: 下订单 INB-1800000001
-  TCS->>CAR: 派车，收货位装货，存储位卸货
-  CAR-->>TCS: 回报位置，直到完成
-  TCS-->>WMS: FINISHED
-  WMS->>SAP: PostGoodsReceipt，带令牌和 If-Match
+  Note over WMS: 内部：收货位登记托盘，创建上架单。此步不调用 Fleet Manager
+  WMS->>FM: 下订单 INB-1800000001
+  FM->>CAR: 派车，收货位装货，存储位卸货
+  CAR-->>FM: 回报位置，直到完成
+  FM-->>WMS: FINISHED
+  Note over WMS: 内部：运输单完成，托盘到存储位
+  WMS->>SAP: PostGoodsReceipt
   SAP-->>WMS: 状态改为 C，物料凭证 5000000001
 ```
 

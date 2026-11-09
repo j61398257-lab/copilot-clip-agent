@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2026-11-09T02:10:33.020885</dc:date>
+    <dc:date>2026-11-09T02:25:08.809175</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -40,7 +40,7 @@ Q 85.03937 70.866142 85.03937 68.031496
 L 85.03937 28.346457 
 Q 85.03937 25.511811 87.874016 25.511811 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #e0eef6; stroke: #0072b2; stroke-width: 0.8; stroke-linejoin: miter"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #e0eef6; stroke: #0072b2; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_3">
     <path d="M 87.874016 82.204724 
@@ -53,7 +53,7 @@ Q 85.03937 144.566929 85.03937 141.732283
 L 85.03937 85.03937 
 Q 85.03937 82.204724 87.874016 82.204724 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #e0f3ee; stroke: #009e73; stroke-width: 0.8; stroke-linejoin: miter"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #e0f3ee; stroke: #009e73; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_4">
     <path d="M 87.874016 155.905512 
@@ -66,7 +66,7 @@ Q 85.03937 201.259843 85.03937 198.425197
 L 85.03937 158.740157 
 Q 85.03937 155.905512 87.874016 155.905512 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #faece0; stroke: #d55e00; stroke-width: 0.8; stroke-linejoin: miter"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #faece0; stroke: #d55e00; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_5">
     <path d="M 87.874016 212.598425 
@@ -79,7 +79,7 @@ Q 85.03937 252.283465 85.03937 249.448819
 L 85.03937 215.433071 
 Q 85.03937 212.598425 87.874016 212.598425 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #f9eff4; stroke: #cc79a7; stroke-width: 0.8; stroke-linejoin: miter"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #f9eff4; stroke: #cc79a7; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_6">
     <path d="M 273.826772 34.015748 
@@ -92,7 +92,7 @@ Q 272.125984 59.527559 272.125984 57.826772
 L 272.125984 35.716535 
 Q 272.125984 34.015748 273.826772 34.015748 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #ffffff; stroke: #0072b2; stroke-width: 0.6; stroke-linejoin: miter"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #ffffff; stroke: #0072b2; stroke-width: 0.6; stroke-linejoin: miter"/>
    </g>
    <g id="patch_7">
     <path d="M 273.826772 99.212598 
@@ -105,7 +105,7 @@ Q 272.125984 124.724409 272.125984 123.023622
 L 272.125984 100.913386 
 Q 272.125984 99.212598 273.826772 99.212598 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #ffffff; stroke: #009e73; stroke-width: 0.6; stroke-linejoin: miter"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #ffffff; stroke: #009e73; stroke-width: 0.6; stroke-linejoin: miter"/>
    </g>
    <g id="patch_8">
     <path d="M 273.826772 164.409449 
@@ -118,7 +118,7 @@ Q 272.125984 189.92126 272.125984 188.220472
 L 272.125984 166.110236 
 Q 272.125984 164.409449 273.826772 164.409449 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #ffffff; stroke: #d55e00; stroke-width: 0.6; stroke-linejoin: miter"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #ffffff; stroke: #d55e00; stroke-width: 0.6; stroke-linejoin: miter"/>
    </g>
    <g id="patch_9">
     <path d="M 273.826772 221.102362 
@@ -131,17 +131,17 @@ Q 272.125984 246.614173 272.125984 244.913386
 L 272.125984 222.80315 
 Q 272.125984 221.102362 273.826772 221.102362 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #ffffff; stroke: #cc79a7; stroke-width: 0.6; stroke-linejoin: miter"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #ffffff; stroke: #cc79a7; stroke-width: 0.6; stroke-linejoin: miter"/>
    </g>
    <g id="line2d_1">
     <path d="M 11.338583 317.480315 
 L 260.787402 317.480315 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #222222; stroke-width: 0.8; stroke-linecap: square"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #222222; stroke-width: 0.8; stroke-linecap: square"/>
    </g>
    <g id="line2d_2">
     <path d="M 11.338583 330.519685 
 L 260.787402 330.519685 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #222222; stroke-width: 0.5; stroke-linecap: square"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #222222; stroke-width: 0.5; stroke-linecap: square"/>
    </g>
    <g id="patch_10">
     <path d="M 11.338583 330.519685 
@@ -149,12 +149,12 @@ L 14.173228 330.519685
 L 14.173228 346.393701 
 L 11.338583 346.393701 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #0072b2"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #0072b2"/>
    </g>
    <g id="line2d_3">
     <path d="M 11.338583 346.393701 
 L 260.787402 346.393701 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
    </g>
    <g id="patch_11">
     <path d="M 11.338583 346.393701 
@@ -162,12 +162,12 @@ L 14.173228 346.393701
 L 14.173228 362.267717 
 L 11.338583 362.267717 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #009e73"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #009e73"/>
    </g>
    <g id="line2d_4">
     <path d="M 11.338583 362.267717 
 L 260.787402 362.267717 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
    </g>
    <g id="patch_12">
     <path d="M 11.338583 362.267717 
@@ -175,12 +175,12 @@ L 14.173228 362.267717
 L 14.173228 378.141732 
 L 11.338583 378.141732 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #d55e00"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #d55e00"/>
    </g>
    <g id="line2d_5">
     <path d="M 11.338583 378.141732 
 L 260.787402 378.141732 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
    </g>
    <g id="patch_13">
     <path d="M 11.338583 378.141732 
@@ -188,27 +188,27 @@ L 14.173228 378.141732
 L 14.173228 394.015748 
 L 11.338583 394.015748 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #cc79a7"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #cc79a7"/>
    </g>
    <g id="line2d_6">
     <path d="M 11.338583 394.015748 
 L 260.787402 394.015748 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
    </g>
    <g id="line2d_7">
     <path d="M 11.338583 394.015748 
 L 260.787402 394.015748 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #222222; stroke-width: 0.8; stroke-linecap: square"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #222222; stroke-width: 0.8; stroke-linecap: square"/>
    </g>
    <g id="line2d_8">
     <path d="M 272.125984 317.480315 
 L 498.897638 317.480315 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #222222; stroke-width: 0.8; stroke-linecap: square"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #222222; stroke-width: 0.8; stroke-linecap: square"/>
    </g>
    <g id="line2d_9">
     <path d="M 272.125984 330.519685 
 L 498.897638 330.519685 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #222222; stroke-width: 0.5; stroke-linecap: square"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #222222; stroke-width: 0.5; stroke-linecap: square"/>
    </g>
    <g id="patch_14">
     <path d="M 272.125984 330.519685 
@@ -216,12 +216,12 @@ L 274.96063 330.519685
 L 274.96063 346.393701 
 L 272.125984 346.393701 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #9a9a9a"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #9a9a9a"/>
    </g>
    <g id="line2d_10">
     <path d="M 272.125984 346.393701 
 L 498.897638 346.393701 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
    </g>
    <g id="patch_15">
     <path d="M 272.125984 346.393701 
@@ -229,12 +229,12 @@ L 274.96063 346.393701
 L 274.96063 362.267717 
 L 272.125984 362.267717 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #e69f00"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #e69f00"/>
    </g>
    <g id="line2d_11">
     <path d="M 272.125984 362.267717 
 L 498.897638 362.267717 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
    </g>
    <g id="patch_16">
     <path d="M 272.125984 362.267717 
@@ -242,12 +242,12 @@ L 274.96063 362.267717
 L 274.96063 378.141732 
 L 272.125984 378.141732 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #009e73"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #009e73"/>
    </g>
    <g id="line2d_12">
     <path d="M 272.125984 378.141732 
 L 498.897638 378.141732 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
    </g>
    <g id="patch_17">
     <path d="M 272.125984 378.141732 
@@ -255,17 +255,17 @@ L 274.96063 378.141732
 L 274.96063 394.015748 
 L 272.125984 394.015748 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #6b6b6b"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #6b6b6b"/>
    </g>
    <g id="line2d_13">
     <path d="M 272.125984 394.015748 
 L 498.897638 394.015748 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
    </g>
    <g id="line2d_14">
     <path d="M 272.125984 394.015748 
 L 498.897638 394.015748 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #222222; stroke-width: 0.8; stroke-linecap: square"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #222222; stroke-width: 0.8; stroke-linecap: square"/>
    </g>
    <g id="patch_18">
     <path d="M 86.173228 26.645669 
@@ -273,7 +273,7 @@ L 89.858268 26.645669
 L 89.858268 69.732283 
 L 86.173228 69.732283 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #0072b2"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #0072b2"/>
    </g>
    <g id="patch_19">
     <path d="M 86.173228 83.338583 
@@ -281,7 +281,7 @@ L 89.858268 83.338583
 L 89.858268 143.433071 
 L 86.173228 143.433071 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #009e73"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #009e73"/>
    </g>
    <g id="patch_20">
     <path d="M 86.173228 157.03937 
@@ -289,7 +289,7 @@ L 89.858268 157.03937
 L 89.858268 200.125984 
 L 86.173228 200.125984 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #d55e00"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #d55e00"/>
    </g>
    <g id="patch_21">
     <path d="M 86.173228 213.732283 
@@ -297,113 +297,113 @@ L 89.858268 213.732283
 L 89.858268 251.149606 
 L 86.173228 251.149606 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #cc79a7"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #cc79a7"/>
    </g>
    <g id="patch_22">
     <path d="M 147.401575 70.866142 
 Q 147.401575 76.535433 147.401575 81.533904 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
     <path d="M 148.401575 79.533904 
 L 147.401575 81.533904 
 L 146.401575 79.533904 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #222222; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #222222; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
    </g>
    <g id="patch_23">
     <path d="M 192.755906 82.204724 
 Q 192.755906 76.535433 192.755906 71.536962 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
     <path d="M 191.755906 73.536962 
 L 192.755906 71.536962 
 L 193.755906 73.536962 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #6b6b6b; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #6b6b6b; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
    </g>
    <g id="patch_24">
     <path d="M 147.401575 144.566929 
 Q 147.401575 150.23622 147.401575 155.234691 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
     <path d="M 148.401575 153.234691 
 L 147.401575 155.234691 
 L 146.401575 153.234691 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #222222; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #222222; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
    </g>
    <g id="patch_25">
     <path d="M 192.755906 155.905512 
 Q 192.755906 150.23622 192.755906 145.23775 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
     <path d="M 191.755906 147.23775 
 L 192.755906 145.23775 
 L 193.755906 147.23775 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #6b6b6b; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #6b6b6b; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
    </g>
    <g id="patch_26">
     <path d="M 147.401575 201.259843 
 Q 147.401575 206.929134 147.401575 211.927605 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
     <path d="M 148.401575 209.927605 
 L 147.401575 211.927605 
 L 146.401575 209.927605 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #222222; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #222222; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
    </g>
    <g id="patch_27">
     <path d="M 192.755906 212.598425 
 Q 192.755906 206.929134 192.755906 201.930663 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
     <path d="M 191.755906 203.930663 
 L 192.755906 201.930663 
 L 193.755906 203.930663 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #6b6b6b; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #6b6b6b; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
    </g>
    <g id="patch_28">
     <path d="M 249.448819 46.771654 
 Q 260.787402 46.771654 271.455164 46.771654 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
     <path d="M 269.455164 45.771654 
 L 271.455164 46.771654 
 L 269.455164 47.771654 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #9a9a9a; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #9a9a9a; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
    </g>
    <g id="patch_29">
     <path d="M 249.448819 111.968504 
 Q 260.787402 111.968504 271.455164 111.968504 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
     <path d="M 269.455164 110.968504 
 L 271.455164 111.968504 
 L 269.455164 112.968504 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #9a9a9a; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #9a9a9a; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
    </g>
    <g id="patch_30">
     <path d="M 249.448819 177.165354 
 Q 260.787402 177.165354 271.455164 177.165354 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
     <path d="M 269.455164 176.165354 
 L 271.455164 177.165354 
 L 269.455164 178.165354 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #9a9a9a; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #9a9a9a; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
    </g>
    <g id="patch_31">
     <path d="M 249.448819 233.858268 
 Q 260.787402 233.858268 271.455164 233.858268 
-" clip-path="url(#pbc47d5c114)" style="fill: none; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: none; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
     <path d="M 269.455164 232.858268 
 L 271.455164 233.858268 
 L 269.455164 234.858268 
 z
-" clip-path="url(#pbc47d5c114)" style="fill: #9a9a9a; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pf2f09a8739)" style="fill: #9a9a9a; stroke: #9a9a9a; stroke-width: 0.6; stroke-linecap: round"/>
    </g>
    <g id="text_1">
     <text style="font-weight: 700; font-size: 9px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="4.251969" y="13.736926" transform="rotate(-0 4.251969 13.736926)">a</text>
    </g>
    <g id="text_2">
-    <text style="font-weight: 700; font-size: 7px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="17.007874" y="15.472964" transform="rotate(-0 17.007874 15.472964)">WMS 直接调用 SAP，再把上架交给车队</text>
+    <text style="font-weight: 700; font-size: 7px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="17.007874" y="15.028354" transform="rotate(-0 17.007874 15.028354)">串行：WMS 先调用 SAP，再调用 Fleet Manager</text>
    </g>
    <g id="text_3">
     <text style="font-weight: 700; font-size: 6.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #0072b2" x="14.173228" y="50.417101" transform="rotate(-0 14.173228 50.417101)">L4 业务计划</text>
@@ -418,19 +418,19 @@ z
     <text style="font-weight: 700; font-size: 6.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #009e73" x="14.173228" y="115.613952" transform="rotate(-0 14.173228 115.613952)">L3 仓储执行</text>
    </g>
    <g id="text_7">
-    <text style="font-weight: 700; font-size: 6.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="94.96063" y="109.365004" transform="rotate(-0 94.96063 109.365004)">WMS · OpenWMS</text>
+    <text style="font-weight: 700; font-size: 6.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="94.96063" y="110.144879" transform="rotate(-0 94.96063 110.144879)">WMS</text>
    </g>
    <g id="text_8">
-    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="94.96063" y="121.547047" transform="rotate(-0 94.96063 121.547047)">直接调 SAP 取交货、过账收货；管库位和托盘</text>
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="94.96063" y="121.53611" transform="rotate(-0 94.96063 121.53611)">先调 SAP；库位和托盘在内部</text>
    </g>
    <g id="text_9">
-    <text style="font-weight: 700; font-size: 6.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #d55e00" x="14.173228" y="180.810802" transform="rotate(-0 14.173228 180.810802)">L2 调度控制</text>
+    <text style="font-weight: 700; font-size: 6.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #d55e00" x="14.173228" y="180.786583" transform="rotate(-0 14.173228 180.786583)">L2 车队</text>
    </g>
    <g id="text_10">
-    <text style="font-weight: 700; font-size: 6.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="94.96063" y="174.858823" transform="rotate(-0 94.96063 174.858823)">openTCS 内核</text>
+    <text style="font-weight: 700; font-size: 6.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="94.96063" y="174.679792" transform="rotate(-0 94.96063 174.679792)">Fleet Manager</text>
    </g>
    <g id="text_11">
-    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="94.96063" y="186.765773" transform="rotate(-0 94.96063 186.765773)">分配车辆、规划路线、拆成行驶段</text>
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="94.96063" y="186.43196" transform="rotate(-0 94.96063 186.43196)">本实验用 openTCS，分配车辆和路线</text>
    </g>
    <g id="text_12">
     <text style="font-weight: 700; font-size: 6.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #cc79a7" x="14.173228" y="234.681179" transform="rotate(-0 14.173228 234.681179)">L1 设备</text>
@@ -448,10 +448,10 @@ z
     <text style="font-size: 5.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="197.007874" y="78.879706" transform="rotate(-0 197.007874 78.879706)">WMS 回写</text>
    </g>
    <g id="text_17">
-    <text style="font-size: 5.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: end; fill: #222222" x="143.149606" y="152.661743" transform="rotate(-0 143.149606 152.661743)">指令</text>
+    <text style="font-size: 5.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: end; fill: #d55e00" x="143.149606" y="152.6719" transform="rotate(-0 143.149606 152.6719)">然后调用</text>
    </g>
    <g id="text_18">
-    <text style="font-size: 5.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="197.007874" y="152.661743" transform="rotate(-0 197.007874 152.661743)">状态</text>
+    <text style="font-size: 5.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="197.007874" y="152.682056" transform="rotate(-0 197.007874 152.682056)">完成回报</text>
    </g>
    <g id="text_19">
     <text style="font-weight: 700; font-size: 6.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="272.125984" y="29.011946" transform="rotate(-0 272.125984 29.011946)">同一笔入库在每层的对象（交货 1800000001）</text>
@@ -466,10 +466,10 @@ z
     <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #009e73" x="277.795276" y="109.305856" transform="rotate(-0 277.795276 109.305856)">上架运输单</text>
    </g>
    <g id="text_23">
-    <text style="font-size: 5.2px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="277.795276" y="118.878679" transform="rotate(-0 277.795276 118.878679)">托盘 4711：收货位 → 存储位，车队单 INB-1800000001</text>
+    <text style="font-size: 5.2px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="277.795276" y="118.919304" transform="rotate(-0 277.795276 118.919304)">托盘 4711：收货位 → 存储位</text>
    </g>
    <g id="text_24">
-    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #d55e00" x="277.795276" y="173.90505" transform="rotate(-0 277.795276 173.90505)">TransportOrder INB-1800000001</text>
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #d55e00" x="277.795276" y="173.90505" transform="rotate(-0 277.795276 173.90505)">Fleet Manager INB-1800000001</text>
    </g>
    <g id="text_25">
     <text style="font-size: 5.2px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="277.795276" y="183.755404" transform="rotate(-0 277.795276 183.755404)">GoodsReceipt 装货 → Storage-01 卸货</text>
@@ -514,7 +514,7 @@ z
     <text style="font-size: 5.3px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="201.259843" y="340.340677" transform="rotate(-0 201.259843 340.340677)">收货 101</text>
    </g>
    <g id="text_39">
-    <text style="font-size: 5.3px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="17.007874" y="355.615545" transform="rotate(-0 17.007874 355.615545)">OpenWMS</text>
+    <text style="font-size: 5.3px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="17.007874" y="356.223388" transform="rotate(-0 17.007874 356.223388)">WMS</text>
    </g>
    <g id="text_40">
     <text style="font-size: 5.3px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="59.527559" y="356.173287" transform="rotate(-0 59.527559 356.173287)">&lt;UUID，每次不同&gt;</text>
@@ -526,7 +526,7 @@ z
     <text style="font-size: 5.3px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="201.259843" y="356.214693" transform="rotate(-0 201.259843 356.214693)">FGIN/ST/0001/…</text>
    </g>
    <g id="text_43">
-    <text style="font-size: 5.3px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="17.007874" y="371.486662" transform="rotate(-0 17.007874 371.486662)">openTCS</text>
+    <text style="font-size: 5.3px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="17.007874" y="371.581482" transform="rotate(-0 17.007874 371.581482)">Fleet Manager</text>
    </g>
    <g id="text_44">
     <text style="font-size: 5.3px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="59.527559" y="372.100303" transform="rotate(-0 59.527559 372.100303)">INB-1800000001</text>
@@ -556,10 +556,10 @@ z
     <text style="font-weight: 700; font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="308.976378" y="326.354699" transform="rotate(-0 308.976378 326.354699)">SAP</text>
    </g>
    <g id="text_53">
-    <text style="font-weight: 700; font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="337.322835" y="325.689511" transform="rotate(-0 337.322835 325.689511)">OpenWMS</text>
+    <text style="font-weight: 700; font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="337.322835" y="326.354699" transform="rotate(-0 337.322835 326.354699)">WMS</text>
    </g>
    <g id="text_54">
-    <text style="font-weight: 700; font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="391.181102" y="325.68634" transform="rotate(-0 391.181102 325.68634)">openTCS</text>
+    <text style="font-weight: 700; font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="391.181102" y="325.790105" transform="rotate(-0 391.181102 325.790105)">Fleet Mgr</text>
    </g>
    <g id="text_55">
     <text style="font-weight: 700; font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="467.716535" y="326.345183" transform="rotate(-0 467.716535 326.345183)">车辆</text>
@@ -625,12 +625,12 @@ z
     <text style="font-size: 5.3px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="467.716535" y="387.499389" transform="rotate(-0 467.716535 387.499389)">—</text>
    </g>
    <g id="text_76">
-    <text style="font-size: 5.4px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="11.338583" y="405.509793" transform="rotate(-0 11.338583 405.509793)">入库交货在车上的时候仍是 'A'，SAP 看不到仓位；执行中这一段只能在 WMS 和车队看到。层级划分参照 ISA-95。</text>
+    <text style="font-size: 5.4px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="11.338583" y="405.208996" transform="rotate(-0 11.338583 405.208996)">入库交货在车上的时候仍是 'A'，SAP 看不到仓位；执行中这一段只能在 WMS 和 Fleet Manager 看到。</text>
    </g>
   </g>
  </g>
  <defs>
-  <clipPath id="pbc47d5c114">
+  <clipPath id="pf2f09a8739">
    <rect x="0" y="0" width="510.23622" height="413.858268"/>
   </clipPath>
  </defs>
