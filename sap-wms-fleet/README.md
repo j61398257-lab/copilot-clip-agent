@@ -14,30 +14,41 @@
 | `fig4_architecture` | 分层架构原理、单号和状态的换算 | [架构.md](架构.md) |
 | `fig5_run_state` | 一次真实运行中各系统状态随时间的变化。改成 ERP 之后还没有新的采样，这张图仍是原先 EWM 那次运行，不要拿它对照现在的调度板 | [架构.md](架构.md) |
 
+## 下载镜像
+
+8 个镜像打成一个文件，放在本仓库的 Release。不用 Docker Hub，不用登录：
+
+https://github.com/j61398257-lab/copilot-clip-agent/releases/download/sap-wms-images/sap-wms-fleet-images.tar.gz
+
+约 633 MB。sha256 是 `814dd8e49e0e5eb8c2ac0bf824e64b6d04bebe6aa37e12ab562c477940097d61`。这是现在这一版，标签是 `wms`。`sap-wms-fleet-lab` 的 `v1.0.0` 是上一版，里面是 `bridge`，不要用。
+
 ## 运行
 
-只需要 Docker Desktop，不用装 Java、Node 或 Python。代码在这个仓库的 `sap-wms-fleet` 目录，下载本仓库即可，不用再去 `sap-wms-fleet-lab`。
+只需要 Docker Desktop，不用装 Java、Node 或 Python。
 
 1. 安装并启动 Docker Desktop。电脑要是 64 位 x86，ARM 版 Windows 不行，OpenWMS 镜像只有 amd64。内存 8 GB 够用，磁盘留 5 GB 以上。
-2. 下载代码，不用登录 GitHub。在 PowerShell 里执行：
+2. 下载代码和镜像包，不用登录 GitHub。在 PowerShell 里执行：
 
    ```powershell
    curl.exe -L -o copilot-clip-agent.zip https://github.com/j61398257-lab/copilot-clip-agent/archive/refs/heads/master.zip
    tar -xf copilot-clip-agent.zip
    cd copilot-clip-agent-master\sap-wms-fleet
+   curl.exe -L -o sap-wms-fleet-images.tar.gz https://github.com/j61398257-lab/copilot-clip-agent/releases/download/sap-wms-images/sap-wms-fleet-images.tar.gz
+   docker load -i sap-wms-fleet-images.tar.gz
    ```
 
-   macOS 或 Linux 把最后一行的反斜杠换成正斜杠。也可以在仓库页面点 **Code → Download ZIP**，解压后进入 `copilot-clip-agent-master/sap-wms-fleet`。
-3. 启动全部容器，包含完整版和 Python 简化版：
+   macOS 或 Linux 把 `cd` 那一行的反斜杠换成正斜杠。也可以在仓库页面点 **Code → Download ZIP**，解压后进入 `copilot-clip-agent-master/sap-wms-fleet`，再下载上面的镜像包。
+3. 用已经加载的镜像启动，不再构建：
 
    ```powershell
-   docker compose up --build -d
+   docker compose -f compose.yaml -f compose.ghcr.yaml up -d
    ```
 
-   第一次要下载镜像并构建，视网速大约 5 到 10 分钟，其中最慢的是从 GitHub 下载 87 MB 的 openTCS。以后再启动只要几十秒。
 4. 打开 <http://localhost:8080>。这一页是架构图，每个框里的文字是该服务此刻的真实结果，不是画上去的示例。两条链路的入库交货 `1800000001` 都显示「已收货」，托盘在存储位 `FGIN/ST/0001/0000/0000`，库区平面上两块牌子都停在存储位，才算跑通。完整版大约一分钟，Python 大约 5 秒，页面每 2 秒自己刷新。出库交货 `8000000001` 留在 SAP 里，状态仍是未过账，这条自动链路先跑入库。
 
-停掉用 `docker compose down`。数据都在内存里，再次 `docker compose up -d` 会从预制的入库交货重新跑。
+停掉用 `docker compose -f compose.yaml -f compose.ghcr.yaml down`。数据都在内存里，再次加上同样的 `-f` 参数启动，会从预制的入库交货重新跑。
+
+没有镜像包、要从源码构建时，在这个目录执行 `docker compose up --build -d`。那一次要访问 Docker Hub 和 GitHub。
 
 ## 只跑通一条链
 
@@ -146,6 +157,6 @@ python make_figures.py
 ## 注意
 
 - SAP 模拟是仓库里的 `sap/server.js`，不包含 SAP 的软件，可以和另外 7 个镜像一起发布。
-- 第一次构建要访问 Docker Hub 和 GitHub（下载 openTCS 7.5.0）。拉镜像卡住时，在 Docker Desktop 的设置里配置代理或镜像加速。只验证串行链时，用上面的 Python 容器，它不拉 OpenWMS 和 openTCS。
+- 用 Release 里的镜像包时，不访问 Docker Hub。只有自己 `docker compose up --build` 时才要 Docker Hub 和 GitHub（下载 openTCS 7.5.0）。拉镜像卡住时，改用上面的镜像包。只验证串行链时，用上面的 Python 容器，它不拉 OpenWMS 和 openTCS。
 - 端口 `4004`、`8080`、`8090`、`8120`、`8131`、`55200`、`9004`、`9120`、`9200`、`9300` 不能被别的程序占用。调度板是 `8080`。`8090` 是完整版 WMS 调用 SAP 的进度，`9120` 是 Python 版 WMS。
 - Docker 的虚拟磁盘默认在 C 盘。C 盘空间不多时，先在 Docker Desktop 的 **Settings → Resources → Advanced** 里把磁盘位置改到 D 盘。

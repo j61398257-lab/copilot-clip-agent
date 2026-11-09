@@ -1,0 +1,34 @@
+# 配合 Release 里的 sap-wms-fleet-images.tar.gz。先 docker load，再：
+# docker compose -f compose.yaml -f compose.ghcr.yaml up -d
+# load 之后这 8 个名字在本机就有，不会去 Docker Hub 构建。
+
+services:
+  sap:
+    image: ghcr.io/j61398257-lab/copilot-clip-agent:sap
+    build: !reset null
+
+  openwms-common:
+    image: ghcr.io/j61398257-lab/copilot-clip-agent:openwms-common-3.0.0
+
+  openwms-tms:
+    image: ghcr.io/j61398257-lab/copilot-clip-agent:openwms-tms-2.0.0
+
+  common-compat:
+    image: ghcr.io/j61398257-lab/copilot-clip-agent:common-compat
+    build: !reset null
+
+  opentcs:
+    image: ghcr.io/j61398257-lab/copilot-clip-agent:opentcs
+    build: !reset null
+
+  wms:
+    image: ghcr.io/j61398257-lab/copilot-clip-agent:wms
+    build: !reset null
+
+  python-chain:
+    image: ghcr.io/j61398257-lab/copilot-clip-agent:python-chain
+    build: !reset null
+
+  board:
+    image: ghcr.io/j61398257-lab/copilot-clip-agent:board
+    build: !reset null

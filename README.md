@@ -2,22 +2,34 @@
 
 容器在 [sap-wms-fleet](sap-wms-fleet/README.md)。另一台电脑装好 Docker Desktop，下载这个仓库就能构建并跑起来。下面四节图和 [docs/sap-erp-wms](docs/sap-erp-wms/README.md) 是同一套，页面上直接显示英文图。中文图把文件名里的 `_en` 换成 `_zh`。
 
-## 下载并运行
+## 下载镜像
 
-不用登录 GitHub，也不用另下一个仓库。PowerShell：
+8 个镜像打成一个文件，放在本仓库的 Release。不用 Docker Hub，不用登录。点这个链接直接下载（约 633 MB）：
+
+https://github.com/j61398257-lab/copilot-clip-agent/releases/download/sap-wms-images/sap-wms-fleet-images.tar.gz
+
+校验码 `814dd8e49e0e5eb8c2ac0bf824e64b6d04bebe6aa37e12ab562c477940097d61`。发布页在 https://github.com/j61398257-lab/copilot-clip-agent/releases/tag/sap-wms-images 。
+
+这是现在这一版：里面有 `wms`，没有 `bridge`。`sap-wms-fleet-lab` 仓库 11 月 8 日的 `v1.0.0` 是上一版，不要用那一份。
+
+PowerShell：
 
 ```powershell
 curl.exe -L -o copilot-clip-agent.zip https://github.com/j61398257-lab/copilot-clip-agent/archive/refs/heads/master.zip
 tar -xf copilot-clip-agent.zip
 cd copilot-clip-agent-master\sap-wms-fleet
-docker compose up --build -d
+curl.exe -L -o sap-wms-fleet-images.tar.gz https://github.com/j61398257-lab/copilot-clip-agent/releases/download/sap-wms-images/sap-wms-fleet-images.tar.gz
+docker load -i sap-wms-fleet-images.tar.gz
+docker compose -f compose.yaml -f compose.ghcr.yaml up -d
 ```
 
-macOS 或 Linux 把 `cd` 那一行的反斜杠换成正斜杠。也可以在本页点 **Code → Download ZIP**，解压后进入 `copilot-clip-agent-master/sap-wms-fleet`，再执行 `docker compose up --build -d`。
+macOS 或 Linux 把 `cd` 那一行的反斜杠换成正斜杠。也可以在本页点 **Code → Download ZIP**，解压后进入 `copilot-clip-agent-master/sap-wms-fleet`，再下载镜像包并 `docker load`。
 
-打开 <http://localhost:8080>。完整版大约一分钟，Python 简化版大约 5 秒。两条入库交货 `1800000001` 都显示已收货，托盘在存储位 `FGIN/ST/0001/0000/0000`，才算跑通。停掉用 `docker compose down`。
+打开 <http://localhost:8080>。完整版大约一分钟，Python 简化版大约 5 秒。两条入库交货 `1800000001` 都显示已收货，托盘在存储位 `FGIN/ST/0001/0000/0000`，才算跑通。停掉用 `docker compose -f compose.yaml -f compose.ghcr.yaml down`。
 
-电脑要是 64 位 x86，内存 8 GB，磁盘留 5 GB。ARM 版 Windows 跑不了完整版，OpenWMS 镜像只有 amd64。第一次构建要能访问 Docker Hub 和 GitHub（openTCS 约 87 MB）。
+电脑要是 64 位 x86，内存 8 GB，磁盘留 5 GB。ARM 版 Windows 跑不了完整版，OpenWMS 镜像只有 amd64。镜像已经在包里，加载时不再访问 Docker Hub。
+
+没有这个镜像包、要从源码构建时，在 `sap-wms-fleet` 目录执行 `docker compose up --build -d`。那一次要能访问 Docker Hub 和 GitHub。
 
 只想先跑通 SAP → WMS → Fleet Manager → 车辆这一条，可以只起 Python 那一个容器，不下载 OpenWMS 和 openTCS：
 
