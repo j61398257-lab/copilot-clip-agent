@@ -1,23 +1,26 @@
 # SAP ERP 加独立 WMS
 
-这四张图是入库交货 `1800000001` 的结果：SAP 只认工厂 `1000` 和库存地点 `FG00`，仓位、托盘和上架在 OpenWMS，车队把货从收货位送到存储位，完成后 SAP 按移动类型 `101` 过账收货。
+没有桥接。WMS 直接调用 SAP 的入库交货和收货过账。库位对照是 WMS 自己的主数据。
 
-同目录里还有英文版，以及 PDF、SVG。文件名以 `_zh` 结尾的是中文，以 `_en` 结尾的是英文。
+高清原图、英文版、PDF 和 SVG 在本目录。文件名以 `_zh` 结尾的是中文，以 `_en` 结尾的是英文。
 
-运行状态图没有放进来。那张仍是改架构之前按 EWM 仓库任务采样的，不能对照这四张。
+## 调用方向
 
-## 图 1 接口
+```mermaid
+flowchart TB
+  SAP["SAP S/4HANA ERP"]
+  WMS["WMS · OpenWMS"]
+  TCS["openTCS"]
+  CAR["Vehicle-01"]
+  WMS -->|"读取未过账入库交货"| SAP
+  WMS -->|"上架完成后 PostGoodsReceipt"| SAP
+  WMS -->|"派上架"| TCS --> CAR
+```
 
 ![接口总览](fig1_interfaces_zh.png)
 
-## 图 2 时序
+![入库时序](fig2_sequence_zh.png)
 
-![入库交货调用时序](fig2_sequence_zh.png)
-
-## 图 3 收货过账
-
-![收货过账校验](fig3_confirm_zh.png)
-
-## 图 4 架构
+![收货过账](fig3_confirm_zh.png)
 
 ![分层架构](fig4_architecture_zh.png)
