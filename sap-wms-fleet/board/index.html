@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>库区调度板</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,680&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #12160f;
+    --panel: #1b2116;
+    --card: #232a1c;
+    --line: #3d4632;
+    --text: #efe7d2;
+    --muted: #b4aa90;
+    --amber: #e6a322;
+    --green: #9dcc72;
+    --blue: #8eb4c9;
+    --clay: #d4785a;
+    --full: #e6a322;
+    --py: #8eb4c9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--text);
+    font-family: "Spline Sans Mono", ui-monospace, monospace;
+    background:
+      radial-gradient(1200px 500px at 10% -10%, rgba(230, 163, 34, 0.16), transparent 55%),
+      radial-gradient(900px 420px at 100% 0%, rgba(142, 180, 201, 0.12), transparent 50%),
+      var(--ink);
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: linear-gradient(to bottom, #000 0%, transparent 92%);
+  }
+  main { position: relative; max-width: 1180px; margin: 0 auto; padding: 36px 22px 64px; }
+  header { display: flex; justify-content: space-between; gap: 24px; align-items: flex-end; margin-bottom: 28px; }
+  h1 { font-family: Fraunces, Georgia, serif; font-weight: 560; font-size: 52px; line-height: 0.9; margin: 0; letter-spacing: -0.03em; }
+  h1 span { display: block; font-family: "Spline Sans Mono", monospace; font-size: 13px; letter-spacing: 0.16em; color: var(--amber); margin-bottom: 10px; }
+  .clock { color: var(--muted); font-size: 12px; text-align: right; }
+  .verdict { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
+  .verdict article, .lane, .floor { background: rgba(27, 33, 22, 0.92); border: 1px solid var(--line); border-radius: 18px; }
+  .verdict article { padding: 16px 18px 14px; }
+  .verdict .kicker { color: var(--muted); font-size: 12px; letter-spacing: 0.12em; }
+  .verdict strong { display: block; margin-top: 6px; font-family: Fraunces, Georgia, serif; font-size: 34px; font-weight: 560; }
+  .verdict p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+  .ok strong { color: var(--green); }
+  .wait strong { color: var(--amber); }
+  .bad strong { color: var(--clay); }
+  .lane { padding: 18px 18px 8px; margin-bottom: 14px; }
+  .lane h2 { margin: 0 0 14px; font-size: 13px; letter-spacing: 0.14em; font-weight: 500; }
+  .lane.full h2 { color: var(--full); }
+  .lane.py h2 { color: var(--py); }
+  .flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 22px; }
+  .node { position: relative; min-height: 168px; padding: 12px 12px 14px; border-radius: 14px; background: var(--card); border: 1px solid #4a543c; }
+  .node:not(:last-child)::after {
+    content: "→";
+    position: absolute;
+    right: -16px; top: 22px; width: auto; height: auto;
+    color: var(--amber); background: none; font-size: 14px;
+  }
+  .node .role { color: var(--muted); font-size: 11px; letter-spacing: 0.08em; }
+  .node .name { margin: 4px 0 8px; font-family: Fraunces, Georgia, serif; font-size: 22px; }
+  .chip { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #343c2a; color: var(--text); font-size: 12px; }
+  .chip.done { background: #2d4324; color: var(--green); }
+  .chip.run { background: #3d3420; color: var(--amber); }
+  .chip.bad { background: #43281f; color: var(--clay); }
+  .detail { margin: 8px 0 0; color: var(--text); font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
+  .detail em { color: var(--muted); font-style: normal; }
+  .floor { padding: 18px 18px 22px; }
+  .floor h2 { margin: 0 0 6px; font-family: Fraunces, Georgia, serif; font-size: 28px; font-weight: 560; }
+  .floor .hint { margin: 0 0 18px; color: var(--muted); font-size: 12px; }
+  .rail { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 36px; }
+  .rail::before { content: ""; position: absolute; left: 8%; right: 8%; top: 18px; height: 4px; border-radius: 4px; background: #4a4328; }
+  .station { position: relative; text-align: center; padding-top: 36px; }
+  .station i { position: absolute; left: 50%; top: 10px; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 6px rgba(230, 163, 34, 0.15); }
+  .station b { display: block; font-size: 14px; }
+  .station span { color: var(--muted); font-size: 12px; }
+  .slot { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 28px; margin-top: 10px; }
+  .token { width: 136px; text-align: center; font-size: 11px; line-height: 1.35; padding: 6px 8px 5px; border-radius: 10px; }
+  .token.full { background: #3d3420; color: var(--amber); }
+  .token.py { background: #24343c; color: var(--py); }
+  .footnote { margin-top: 14px; color: var(--muted); font-size: 12px; }
+  @media (max-width: 860px) {
+    h1 { font-size: 40px; }
+    header, .verdict { display: block; }
+    .clock { text-align: left; margin-top: 12px; }
+    .verdict article + article { margin-top: 12px; }
+    .flow { grid-template-columns: 1fr; }
+    .node:not(:last-child)::after { display: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1><span>SAP ERP → 独立 WMS → 车队</span>库区调度板</h1>
+    <div class="clock" id="clock">正在读取两条链路</div>
+  </header>
+  <section class="verdict">
+    <article id="sum-full"><div class="kicker">完整版 · SAP ERP / OpenWMS / openTCS</div><strong>读取中</strong><p></p></article>
+    <article id="sum-py"><div class="kicker">Python 简化版 · 同一张入库交货</div><strong>读取中</strong><p></p></article>
+  </section>
+  <section class="lane full" id="lane-full"></section>
+  <section class="lane py" id="lane-py"></section>
+  <section class="floor">
+    <h2>库区平面</h2>
+    <p class="hint">上面每个框的仓位、路线和这里是同一套名字。车停在哪，牌子就移到哪。</p>
+    <div class="rail">
+      <div class="station"><i></i><b>停车</b><span>Point-Park</span><div class="slot" id="slot-Point-Park"></div></div>
+      <div class="station"><i></i><b>收货</b><span>GR-DOCK · Point-GR</span><div class="slot" id="slot-Point-GR"></div></div>
+      <div class="station"><i></i><b>存储</b><span>ST-01 · Point-Store</span><div class="slot" id="slot-Point-Store"></div></div>
+    </div>
+    <div hidden>
+      <div class="token full" id="token-full">完整版</div>
+      <div class="token py" id="token-py">Python</div>
+    </div>
+    <p class="footnote" id="footnote"></p>
+  </section>
+</main>
+<script>
+const LABELS = {
+  GR_POSTED: '已收货', FINISHED: '已完成', IN_PROCESS: '执行中', OPEN: '未过账', PARTIAL: '部分过账',
+  CREATED: '已创建', STARTED: '已开始', BEING_PROCESSED: '执行中', DISPATCHABLE: '待分配',
+  IDLE: '空闲', EXECUTING: '行驶中', CANCELLED: '已取消', EXCEPTION: '异常', FAILED: '失败'
+}
+
+function label(value) { return LABELS[value] || value || '没有数据' }
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]))
+}
+function chip(value) {
+  const text = esc(label(value))
+  const kind = value === 'GR_POSTED' || value === 'FINISHED' || value === 'IDLE' ? 'done' : (value === 'EXCEPTION' || value === 'FAILED' ? 'bad' : 'run')
+  return `<span class="chip ${kind}">${text}</span>`
+}
+function field(name, value) { return value ? `<div class="detail"><em>${esc(name)}</em> ${esc(value)}</div>` : '' }
+function node(role, name, state, lines) {
+  return `<div class="node"><div class="role">${role}</div><div class="name">${name}</div>${chip(state)}${lines}</div>`
+}
+function lane(title, chain) {
+  const task = chain.task
+  const ops = { 'Load cargo': '装货', 'Unload cargo': '卸货' }
+  const places = (chain.fleet && chain.fleet.destinations || []).map((item) => field('路段', `${item.place} ${ops[item.operation] || item.operation} ${label(item.state)}`)).join('')
+  const sapState = task ? task.status : null
+  const cards = [
+    node('交货', 'SAP', sapState, task ? field('入库交货', task.taskNo) + field('货', `${task.product} × ${task.qty}`) + field('工厂/库存地点', `${task.plant} / ${task.storageLocation}`) + field('物料凭证', task.materialDocument || '还没过账') : field('', chain.tasksError || '还没有这张交货单')),
+    node('仓库', 'WMS', chain.wms && chain.wms.state, (chain.wms ? field('运输单', chain.wms.id) + field('托盘', (chain.pallet && chain.pallet.location) || '') : field('', chain.wmsError || (chain.pallet && chain.pallet.error) || '')) + field('调用 SAP', chain.note || chain.noteError || '还没有调用')),
+    node('车队', 'Fleet Manager', chain.fleet && chain.fleet.state, chain.fleet ? field('订单', chain.fleet.name) + places : field('', chain.fleetError || '')),
+    node('车辆', 'Vehicle-01', chain.vehicle && chain.vehicle.state, chain.vehicle ? field('位置', chain.vehicle.position) : field('', chain.vehicleError || ''))
+  ]
+  return `<h2>${title}</h2><div class="flow">${cards.join('')}</div>`
+}
+function summarize(article, chain, palletText) {
+  const status = chain.task && chain.task.status
+  article.className = status === 'GR_POSTED' ? 'ok' : (status ? 'wait' : 'bad')
+  article.querySelector('strong').textContent = status ? label(status) : '未连通'
+  const where = chain.pallet && chain.pallet.location
+  article.querySelector('p').textContent = where ? `托盘 ${where}` : (palletText || '托盘位置还没有')
+}
+function place(token, position) {
+  const slot = document.getElementById('slot-' + (position || 'Point-Park'))
+  token.style.opacity = position ? '1' : '0.45'
+  token.textContent = (token.classList.contains('full') ? '完整版 ' : 'Python ') + (position || '未知')
+  if (slot) slot.appendChild(token)
+}
+async function tick() {
+  const response = await fetch('/api/snapshot', { cache: 'no-store' })
+  const data = await response.json()
+  document.getElementById('clock').textContent = data.at.replace('T', ' ').replace('+08:00', '')
+  summarize(document.getElementById('sum-full'), data.full)
+  summarize(document.getElementById('sum-py'), data.python)
+  document.getElementById('lane-full').innerHTML = lane('完整版架构 · 框里是这一步的当前结果', data.full)
+  document.getElementById('lane-py').innerHTML = lane('Python 简化版 · 同一形状，数字来自 python-chain', data.python)
+  place(document.getElementById('token-full'), data.full.vehicle && data.full.vehicle.position)
+  place(document.getElementById('token-py'), data.python.vehicle && data.python.vehicle.position)
+  const others = (data.full.otherTasks || []).map((item) => `出库交货 ${item.taskNo} 仍是${label(item.status)}，这条环境先跑入库`).join('，')
+  document.getElementById('footnote').textContent = others
+}
+tick().catch((error) => { document.getElementById('clock').textContent = '调度板读取失败：' + error.message })
+setInterval(() => tick().catch(() => {}), 2000)
+</script>
+</body>
+</html>

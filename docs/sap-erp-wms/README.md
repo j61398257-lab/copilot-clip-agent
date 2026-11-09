@@ -1,6 +1,6 @@
 # SAP ERP 加独立 WMS
 
-本目录四张图和仓库首页 README 的图 1 到图 4 是同一套。这里直接显示英文图。中文文件名把 `_en` 换成 `_zh`，另外各有 PDF 和 SVG。
+本目录四张图和仓库首页 README 的图 1 到图 4 是同一套。这里直接显示英文图。中文文件名把 `_en` 换成 `_zh`，另外各有 PDF 和 SVG。要在另一台电脑跑容器，按首页的「下载并运行」，进入 `sap-wms-fleet` 后执行 `docker compose up --build -d`。
 
 入库交货 `1800000001`。调用顺序是 SAP，然后 WMS，然后 Fleet Manager，然后车辆。库位和托盘在 WMS 内部。Fleet Manager 这一层本实验用 openTCS。
 

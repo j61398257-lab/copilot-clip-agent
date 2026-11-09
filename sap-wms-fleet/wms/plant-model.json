@@ -1,0 +1,204 @@
+{
+  "name": "LabWarehouse",
+  "points": [
+    {
+      "name": "Point-Park",
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "vehicleOrientationAngle": "NaN",
+      "type": "HALT_POSITION",
+      "vehicleEnvelopes": [],
+      "maxVehicleBoundingBox": {
+        "length": 1000,
+        "width": 1000,
+        "height": 1000,
+        "referenceOffset": { "x": 0, "y": 0 }
+      },
+      "layout": {
+        "position": { "x": 0, "y": 0 },
+        "labelOffset": { "x": 0, "y": 0 },
+        "layerId": 0
+      },
+      "properties": []
+    },
+    {
+      "name": "Point-GR",
+      "position": { "x": 8000, "y": 0, "z": 0 },
+      "vehicleOrientationAngle": "NaN",
+      "type": "HALT_POSITION",
+      "vehicleEnvelopes": [],
+      "maxVehicleBoundingBox": {
+        "length": 1000,
+        "width": 1000,
+        "height": 1000,
+        "referenceOffset": { "x": 0, "y": 0 }
+      },
+      "layout": {
+        "position": { "x": 160, "y": 0 },
+        "labelOffset": { "x": 0, "y": 0 },
+        "layerId": 0
+      },
+      "properties": []
+    },
+    {
+      "name": "Point-Store",
+      "position": { "x": 16000, "y": 0, "z": 0 },
+      "vehicleOrientationAngle": "NaN",
+      "type": "HALT_POSITION",
+      "vehicleEnvelopes": [],
+      "maxVehicleBoundingBox": {
+        "length": 1000,
+        "width": 1000,
+        "height": 1000,
+        "referenceOffset": { "x": 0, "y": 0 }
+      },
+      "layout": {
+        "position": { "x": 320, "y": 0 },
+        "labelOffset": { "x": 0, "y": 0 },
+        "layerId": 0
+      },
+      "properties": []
+    }
+  ],
+  "paths": [
+    {
+      "name": "Park-to-GR",
+      "srcPointName": "Point-Park",
+      "destPointName": "Point-GR",
+      "length": 8000,
+      "maxVelocity": 1000,
+      "maxReverseVelocity": 1000,
+      "peripheralOperations": [],
+      "locked": false,
+      "layout": { "connectionType": "DIRECT", "layerId": 0, "controlPoints": [] },
+      "vehicleEnvelopes": [],
+      "properties": []
+    },
+    {
+      "name": "GR-to-Park",
+      "srcPointName": "Point-GR",
+      "destPointName": "Point-Park",
+      "length": 8000,
+      "maxVelocity": 1000,
+      "maxReverseVelocity": 1000,
+      "peripheralOperations": [],
+      "locked": false,
+      "layout": { "connectionType": "DIRECT", "layerId": 0, "controlPoints": [] },
+      "vehicleEnvelopes": [],
+      "properties": []
+    },
+    {
+      "name": "GR-to-Store",
+      "srcPointName": "Point-GR",
+      "destPointName": "Point-Store",
+      "length": 8000,
+      "maxVelocity": 1000,
+      "maxReverseVelocity": 1000,
+      "peripheralOperations": [],
+      "locked": false,
+      "layout": { "connectionType": "DIRECT", "layerId": 0, "controlPoints": [] },
+      "vehicleEnvelopes": [],
+      "properties": []
+    },
+    {
+      "name": "Store-to-GR",
+      "srcPointName": "Point-Store",
+      "destPointName": "Point-GR",
+      "length": 8000,
+      "maxVelocity": 1000,
+      "maxReverseVelocity": 1000,
+      "peripheralOperations": [],
+      "locked": false,
+      "layout": { "connectionType": "DIRECT", "layerId": 0, "controlPoints": [] },
+      "vehicleEnvelopes": [],
+      "properties": []
+    }
+  ],
+  "locationTypes": [
+    {
+      "name": "Transfer",
+      "allowedOperations": ["Load cargo", "Unload cargo"],
+      "allowedPeripheralOperations": [],
+      "layout": { "locationRepresentation": "LOAD_TRANSFER_GENERIC" },
+      "properties": []
+    }
+  ],
+  "locations": [
+    {
+      "name": "GoodsReceipt",
+      "typeName": "Transfer",
+      "position": { "x": 8000, "y": 2000, "z": 0 },
+      "links": [
+        {
+          "pointName": "Point-GR",
+          "allowedOperations": ["Load cargo", "Unload cargo"]
+        }
+      ],
+      "locked": false,
+      "layout": {
+        "position": { "x": 160, "y": 40 },
+        "labelOffset": { "x": 0, "y": 0 },
+        "locationRepresentation": "LOAD_TRANSFER_GENERIC",
+        "layerId": 0
+      },
+      "properties": []
+    },
+    {
+      "name": "Storage-01",
+      "typeName": "Transfer",
+      "position": { "x": 16000, "y": 2000, "z": 0 },
+      "links": [
+        {
+          "pointName": "Point-Store",
+          "allowedOperations": ["Load cargo", "Unload cargo"]
+        }
+      ],
+      "locked": false,
+      "layout": {
+        "position": { "x": 320, "y": 40 },
+        "labelOffset": { "x": 0, "y": 0 },
+        "locationRepresentation": "LOAD_TRANSFER_GENERIC",
+        "layerId": 0
+      },
+      "properties": []
+    }
+  ],
+  "blocks": [],
+  "vehicles": [
+    {
+      "name": "Vehicle-01",
+      "boundingBox": {
+        "length": 1000,
+        "width": 1000,
+        "height": 1000,
+        "referenceOffset": { "x": 0, "y": 0 }
+      },
+      "energyLevelCritical": 15,
+      "energyLevelGood": 40,
+      "energyLevelFullyRecharged": 90,
+      "energyLevelSufficientlyRecharged": 60,
+      "maxVelocity": 1000,
+      "maxReverseVelocity": 500,
+      "envelopeKey": "",
+      "layout": { "routeColor": "#00AA00" },
+      "properties": [
+        { "name": "loopback:initialPosition", "value": "Point-Park" },
+        { "name": "loopback:operatingTime", "value": "1000" },
+        { "name": "loopback:loadOperation", "value": "Load cargo" },
+        { "name": "loopback:unloadOperation", "value": "Unload cargo" }
+      ]
+    }
+  ],
+  "visualLayout": {
+    "name": "Layout-01",
+    "scaleX": 50.0,
+    "scaleY": 50.0,
+    "layers": [
+      { "id": 0, "ordinal": 0, "visible": true, "name": "Default", "groupId": 0 }
+    ],
+    "layerGroups": [
+      { "id": 0, "name": "Default", "visible": true }
+    ],
+    "properties": []
+  },
+  "properties": []
+}

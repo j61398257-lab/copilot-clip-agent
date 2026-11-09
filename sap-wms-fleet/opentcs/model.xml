@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model version="7.0.0" name="LabWarehouse">
+    <point name="Point-GR" positionX="8000" positionY="0" positionZ="0" vehicleOrientationAngle="NaN" type="HALT_POSITION">
+        <maxVehicleBoundingBox length="1000" width="1000" height="1000" referenceOffsetX="0" referenceOffsetY="0"/>
+        <outgoingPath name="GR-to-Park"/>
+        <outgoingPath name="GR-to-Store"/>
+        <pointLayout labelOffsetX="0" labelOffsetY="0" layerId="0"/>
+    </point>
+    <point name="Point-Park" positionX="0" positionY="0" positionZ="0" vehicleOrientationAngle="NaN" type="HALT_POSITION">
+        <maxVehicleBoundingBox length="1000" width="1000" height="1000" referenceOffsetX="0" referenceOffsetY="0"/>
+        <outgoingPath name="Park-to-GR"/>
+        <pointLayout labelOffsetX="0" labelOffsetY="0" layerId="0"/>
+    </point>
+    <point name="Point-Store" positionX="16000" positionY="0" positionZ="0" vehicleOrientationAngle="NaN" type="HALT_POSITION">
+        <maxVehicleBoundingBox length="1000" width="1000" height="1000" referenceOffsetX="0" referenceOffsetY="0"/>
+        <outgoingPath name="Store-to-GR"/>
+        <pointLayout labelOffsetX="0" labelOffsetY="0" layerId="0"/>
+    </point>
+    <path name="GR-to-Park" sourcePoint="Point-GR" destinationPoint="Point-Park" length="8000" maxVelocity="1000" maxReverseVelocity="1000" locked="false">
+        <pathLayout connectionType="DIRECT" layerId="0"/>
+    </path>
+    <path name="GR-to-Store" sourcePoint="Point-GR" destinationPoint="Point-Store" length="8000" maxVelocity="1000" maxReverseVelocity="1000" locked="false">
+        <pathLayout connectionType="DIRECT" layerId="0"/>
+    </path>
+    <path name="Park-to-GR" sourcePoint="Point-Park" destinationPoint="Point-GR" length="8000" maxVelocity="1000" maxReverseVelocity="1000" locked="false">
+        <pathLayout connectionType="DIRECT" layerId="0"/>
+    </path>
+    <path name="Store-to-GR" sourcePoint="Point-Store" destinationPoint="Point-GR" length="8000" maxVelocity="1000" maxReverseVelocity="1000" locked="false">
+        <pathLayout connectionType="DIRECT" layerId="0"/>
+    </path>
+    <vehicle name="Vehicle-01" energyLevelCritical="15" energyLevelGood="40" energyLevelFullyRecharged="90" energyLevelSufficientlyRecharged="60" maxVelocity="1000" maxReverseVelocity="500" envelopeKey="">
+        <boundingBox length="1000" width="1000" height="1000" referenceOffsetX="0" referenceOffsetY="0"/>
+        <property name="loopback:initialPosition" value="Point-Park"/>
+        <property name="loopback:loadOperation" value="Load cargo"/>
+        <property name="loopback:operatingTime" value="1000"/>
+        <property name="loopback:unloadOperation" value="Unload cargo"/>
+        <vehicleLayout color="#00AA00"/>
+    </vehicle>
+    <locationType name="Transfer">
+        <allowedOperation name="Load cargo"/>
+        <allowedOperation name="Unload cargo"/>
+        <locationTypeLayout locationRepresentation="LOAD_TRANSFER_GENERIC"/>
+    </locationType>
+    <location name="GoodsReceipt" positionX="8000" positionY="2000" positionZ="0" locked="false" type="Transfer">
+        <link point="Point-GR">
+            <allowedOperation name="Load cargo"/>
+            <allowedOperation name="Unload cargo"/>
+        </link>
+        <locationLayout labelOffsetX="0" labelOffsetY="0" locationRepresentation="LOAD_TRANSFER_GENERIC" layerId="0"/>
+    </location>
+    <location name="Storage-01" positionX="16000" positionY="2000" positionZ="0" locked="false" type="Transfer">
+        <link point="Point-Store">
+            <allowedOperation name="Load cargo"/>
+            <allowedOperation name="Unload cargo"/>
+        </link>
+        <locationLayout labelOffsetX="0" labelOffsetY="0" locationRepresentation="LOAD_TRANSFER_GENERIC" layerId="0"/>
+    </location>
+    <visualLayout name="Layout-01" scaleX="50.0" scaleY="50.0">
+        <layer id="0" ordinal="0" visible="true" name="Default" groupId="0"/>
+        <layerGroup id="0" name="Default" visible="true"/>
+    </visualLayout>
+</model>

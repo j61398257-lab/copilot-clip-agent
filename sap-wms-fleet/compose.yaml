@@ -1,0 +1,96 @@
+name: sap-wms-fleet-lab
+
+services:
+  sap:
+    build: ./sap
+    ports:
+      - "4004:4004"
+    environment:
+      NODE_ENV: production
+
+  openwms-common:
+    image: openwms/org.openwms.common.service:3.0.0
+    ports:
+      - "8120:8120"
+    environment:
+      SPRING_PROFILES_ACTIVE: DEMO
+      EUREKA_CLIENT_ENABLED: "false"
+      EUREKA_CLIENT_REGISTERWITHEUREKA: "false"
+      EUREKA_CLIENT_FETCHREGISTRY: "false"
+      SPRING_CLOUD_CONFIG_ENABLED: "false"
+      SPRING_CLOUD_DISCOVERY_ENABLED: "false"
+      SPRING_CLOUD_BUS_ENABLED: "false"
+      MANAGEMENT_HEALTH_RABBIT_ENABLED: "false"
+      JAVA_TOOL_OPTIONS: "-Xmx384m"
+
+  openwms-tms:
+    image: openwms/org.openwms.tms.transportation:2.0.0
+    ports:
+      - "8131:8131"
+    environment:
+      EUREKA_CLIENT_ENABLED: "false"
+      EUREKA_CLIENT_REGISTERWITHEUREKA: "false"
+      EUREKA_CLIENT_FETCHREGISTRY: "false"
+      SPRING_CLOUD_CONFIG_ENABLED: "false"
+      SPRING_CLOUD_DISCOVERY_ENABLED: "false"
+      SPRING_CLOUD_BUS_ENABLED: "false"
+      MANAGEMENT_HEALTH_RABBIT_ENABLED: "false"
+      SPRING_APPLICATION_JSON: '{"spring":{"cloud":{"openfeign":{"client":{"config":{"common-service":{"url":"http://common-compat:8120"}}}}}}}'
+      JAVA_TOOL_OPTIONS: "-Xmx384m"
+    depends_on:
+      - common-compat
+
+  common-compat:
+    build: ./common-compat
+    restart: on-failure
+    depends_on:
+      - openwms-common
+
+  opentcs:
+    build: ./opentcs
+    ports:
+      - "55200:55200"
+
+  wms:
+    build: ./wms
+    restart: on-failure
+    ports:
+      - "8090:8090"
+    environment:
+      SAP_URL: http://sap:4004
+      WMS_COMMON_URL: http://openwms-common:8120
+      WMS_TMS_URL: http://openwms-tms:8131
+      FLEET_URL: http://opentcs:55200
+    depends_on:
+      - sap
+      - openwms-common
+      - openwms-tms
+      - opentcs
+
+  python-chain:
+    build: ./python
+    init: true
+    restart: on-failure
+    environment:
+      TZ: Asia/Shanghai
+    ports:
+      - "9004:9004"
+      - "9120:9120"
+      - "9200:9200"
+      - "9300:9300"
+
+  board:
+    build: ./board
+    init: true
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    environment:
+      TZ: Asia/Shanghai
+    depends_on:
+      - sap
+      - wms
+      - openwms-common
+      - openwms-tms
+      - opentcs
+      - python-chain

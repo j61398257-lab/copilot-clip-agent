@@ -1,0 +1,13 @@
+name: sap-wms-fleet-lab-python
+
+services:
+  chain:
+    build: .
+    init: true
+    environment:
+      TZ: Asia/Shanghai
+    ports:
+      - "9004:9004"
+      - "9120:9120"
+      - "9200:9200"
+      - "9300:9300"
