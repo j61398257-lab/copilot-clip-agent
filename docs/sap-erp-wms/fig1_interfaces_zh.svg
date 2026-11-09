@@ -1,0 +1,1108 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="510.23622pt" height="598.110236pt" viewBox="0 0 510.23622 598.110236" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-11-09T01:25:37.385539</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 598.110236 
+L 510.23622 598.110236 
+L 510.23622 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 11.338583 264.188976 
+L 498.897638 264.188976 
+L 498.897638 286.299213 
+L 11.338583 286.299213 
+z
+" clip-path="url(#p615db600ad)" style="fill: #e0eef6"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 11.338583 297.354331 
+L 498.897638 297.354331 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 11.338583 308.409449 
+L 498.897638 308.409449 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 11.338583 319.464567 
+L 498.897638 319.464567 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_4">
+    <path d="M 11.338583 330.519685 
+L 498.897638 330.519685 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_5">
+    <path d="M 11.338583 341.574803 
+L 498.897638 341.574803 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_6">
+    <path d="M 11.338583 352.629921 
+L 498.897638 352.629921 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_7">
+    <path d="M 11.338583 363.685039 
+L 498.897638 363.685039 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 11.338583 363.685039 
+L 498.897638 363.685039 
+L 498.897638 374.740157 
+L 11.338583 374.740157 
+z
+" clip-path="url(#p615db600ad)" style="fill: #e0f3ee"/>
+   </g>
+   <g id="line2d_8">
+    <path d="M 11.338583 385.795276 
+L 498.897638 385.795276 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_9">
+    <path d="M 11.338583 396.850394 
+L 498.897638 396.850394 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_10">
+    <path d="M 11.338583 407.905512 
+L 498.897638 407.905512 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_11">
+    <path d="M 11.338583 418.96063 
+L 498.897638 418.96063 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 11.338583 418.96063 
+L 498.897638 418.96063 
+L 498.897638 430.015748 
+L 11.338583 430.015748 
+z
+" clip-path="url(#p615db600ad)" style="fill: #e0f3ee"/>
+   </g>
+   <g id="line2d_12">
+    <path d="M 11.338583 441.070866 
+L 498.897638 441.070866 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_13">
+    <path d="M 11.338583 452.125984 
+L 498.897638 452.125984 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_14">
+    <path d="M 11.338583 463.181102 
+L 498.897638 463.181102 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_15">
+    <path d="M 11.338583 474.23622 
+L 498.897638 474.23622 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 11.338583 474.23622 
+L 498.897638 474.23622 
+L 498.897638 485.291339 
+L 11.338583 485.291339 
+z
+" clip-path="url(#p615db600ad)" style="fill: #faece0"/>
+   </g>
+   <g id="line2d_16">
+    <path d="M 11.338583 496.346457 
+L 498.897638 496.346457 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_17">
+    <path d="M 11.338583 507.401575 
+L 498.897638 507.401575 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_18">
+    <path d="M 11.338583 518.456693 
+L 498.897638 518.456693 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_19">
+    <path d="M 11.338583 529.511811 
+L 498.897638 529.511811 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_20">
+    <path d="M 11.338583 540.566929 
+L 498.897638 540.566929 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_21">
+    <path d="M 11.338583 551.622047 
+L 498.897638 551.622047 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 11.338583 551.622047 
+L 498.897638 551.622047 
+L 498.897638 562.677165 
+L 11.338583 562.677165 
+z
+" clip-path="url(#p615db600ad)" style="fill: #fcf3e0"/>
+   </g>
+   <g id="line2d_22">
+    <path d="M 11.338583 573.732283 
+L 498.897638 573.732283 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #dddddd; stroke-width: 0.3; stroke-linecap: square"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 14.173228 19.84252 
+L 150.23622 19.84252 
+Q 153.070866 19.84252 153.070866 22.677165 
+L 153.070866 198.425197 
+Q 153.070866 201.259843 150.23622 201.259843 
+L 14.173228 201.259843 
+Q 11.338583 201.259843 11.338583 198.425197 
+L 11.338583 22.677165 
+Q 11.338583 19.84252 14.173228 19.84252 
+z
+" clip-path="url(#p615db600ad)" style="fill: #e6f1f7; stroke: #0072b2; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 24.377953 70.866142 
+L 140.031496 70.866142 
+Q 141.732283 70.866142 141.732283 72.566929 
+L 141.732283 103.181102 
+Q 141.732283 104.88189 140.031496 104.88189 
+L 24.377953 104.88189 
+Q 22.677165 104.88189 22.677165 103.181102 
+L 22.677165 72.566929 
+Q 22.677165 70.866142 24.377953 70.866142 
+z
+" clip-path="url(#p615db600ad)" style="fill: #ffffff; stroke: #0072b2; stroke-width: 0.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 24.377953 119.055118 
+L 140.031496 119.055118 
+Q 141.732283 119.055118 141.732283 120.755906 
+L 141.732283 188.220472 
+Q 141.732283 189.92126 140.031496 189.92126 
+L 24.377953 189.92126 
+Q 22.677165 189.92126 22.677165 188.220472 
+L 22.677165 120.755906 
+Q 22.677165 119.055118 24.377953 119.055118 
+z
+" clip-path="url(#p615db600ad)" style="fill: #ffffff; stroke: #0072b2; stroke-width: 0.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 212.598425 62.362205 
+L 308.976378 62.362205 
+Q 311.811024 62.362205 311.811024 65.19685 
+L 311.811024 144.566929 
+Q 311.811024 147.401575 308.976378 147.401575 
+L 212.598425 147.401575 
+Q 209.76378 147.401575 209.76378 144.566929 
+L 209.76378 65.19685 
+Q 209.76378 62.362205 212.598425 62.362205 
+z
+" clip-path="url(#p615db600ad)" style="fill: #fcf5e6; stroke: #e69f00; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 377.007874 11.338583 
+L 496.062992 11.338583 
+Q 498.897638 11.338583 498.897638 14.173228 
+L 498.897638 51.023622 
+Q 498.897638 53.858268 496.062992 53.858268 
+L 377.007874 53.858268 
+Q 374.173228 53.858268 374.173228 51.023622 
+L 374.173228 14.173228 
+Q 374.173228 11.338583 377.007874 11.338583 
+z
+" clip-path="url(#p615db600ad)" style="fill: #e6f5f1; stroke: #009e73; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 377.007874 65.19685 
+L 496.062992 65.19685 
+Q 498.897638 65.19685 498.897638 68.031496 
+L 498.897638 104.88189 
+Q 498.897638 107.716535 496.062992 107.716535 
+L 377.007874 107.716535 
+Q 374.173228 107.716535 374.173228 104.88189 
+L 374.173228 68.031496 
+Q 374.173228 65.19685 377.007874 65.19685 
+z
+" clip-path="url(#p615db600ad)" style="fill: #e6f5f1; stroke: #009e73; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 377.007874 119.055118 
+L 496.062992 119.055118 
+Q 498.897638 119.055118 498.897638 121.889764 
+L 498.897638 158.740157 
+Q 498.897638 161.574803 496.062992 161.574803 
+L 377.007874 161.574803 
+Q 374.173228 161.574803 374.173228 158.740157 
+L 374.173228 121.889764 
+Q 374.173228 119.055118 377.007874 119.055118 
+z
+" clip-path="url(#p615db600ad)" style="fill: #fbefe6; stroke: #d55e00; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 377.007874 172.913386 
+L 496.062992 172.913386 
+Q 498.897638 172.913386 498.897638 175.748031 
+L 498.897638 198.425197 
+Q 498.897638 201.259843 496.062992 201.259843 
+L 377.007874 201.259843 
+Q 374.173228 201.259843 374.173228 198.425197 
+L 374.173228 175.748031 
+Q 374.173228 172.913386 377.007874 172.913386 
+z
+" clip-path="url(#p615db600ad)" style="fill: #faf2f6; stroke: #cc79a7; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 14.173228 212.598425 
+L 150.23622 212.598425 
+Q 153.070866 212.598425 153.070866 215.433071 
+L 153.070866 229.606299 
+Q 153.070866 232.440945 150.23622 232.440945 
+L 14.173228 232.440945 
+Q 11.338583 232.440945 11.338583 229.606299 
+L 11.338583 215.433071 
+Q 11.338583 212.598425 14.173228 212.598425 
+z
+" clip-path="url(#p615db600ad)" style="fill: #ffffff; stroke-dasharray: 1,0.75; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 212.598425 175.748031 
+L 308.976378 175.748031 
+Q 311.811024 175.748031 311.811024 178.582677 
+L 311.811024 198.425197 
+Q 311.811024 201.259843 308.976378 201.259843 
+L 212.598425 201.259843 
+Q 209.76378 201.259843 209.76378 198.425197 
+L 209.76378 178.582677 
+Q 209.76378 175.748031 212.598425 175.748031 
+z
+" clip-path="url(#p615db600ad)" style="fill: #ffffff; stroke-dasharray: 1,0.75; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="line2d_23">
+    <path d="M 11.338583 264.188976 
+L 498.897638 264.188976 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #222222; stroke-width: 0.8; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_24">
+    <path d="M 11.338583 249.448819 
+L 498.897638 249.448819 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #222222; stroke-width: 0.8; stroke-linecap: square"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 11.338583 264.188976 
+L 14.173228 264.188976 
+L 14.173228 286.299213 
+L 11.338583 286.299213 
+z
+" clip-path="url(#p615db600ad)" style="fill: #0072b2"/>
+   </g>
+   <g id="patch_18">
+    <path d="M 11.338583 363.685039 
+L 14.173228 363.685039 
+L 14.173228 374.740157 
+L 11.338583 374.740157 
+z
+" clip-path="url(#p615db600ad)" style="fill: #009e73"/>
+   </g>
+   <g id="patch_19">
+    <path d="M 11.338583 418.96063 
+L 14.173228 418.96063 
+L 14.173228 430.015748 
+L 11.338583 430.015748 
+z
+" clip-path="url(#p615db600ad)" style="fill: #009e73"/>
+   </g>
+   <g id="patch_20">
+    <path d="M 11.338583 474.23622 
+L 14.173228 474.23622 
+L 14.173228 485.291339 
+L 11.338583 485.291339 
+z
+" clip-path="url(#p615db600ad)" style="fill: #d55e00"/>
+   </g>
+   <g id="patch_21">
+    <path d="M 11.338583 551.622047 
+L 14.173228 551.622047 
+L 14.173228 562.677165 
+L 11.338583 562.677165 
+z
+" clip-path="url(#p615db600ad)" style="fill: #e69f00"/>
+   </g>
+   <g id="line2d_25">
+    <path d="M 11.338583 573.732283 
+L 498.897638 573.732283 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #222222; stroke-width: 0.8; stroke-linecap: square"/>
+   </g>
+   <g id="patch_22">
+    <path d="M 12.472441 20.976378 
+L 16.440945 20.976378 
+L 16.440945 200.125984 
+L 12.472441 200.125984 
+z
+" clip-path="url(#p615db600ad)" style="fill: #0072b2"/>
+   </g>
+   <g id="line2d_26">
+    <path d="M 82.204724 104.88189 
+L 82.204724 119.055118 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #0072b2; stroke-width: 0.5; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_27">
+    <path d="M 28.346457 160.440945 
+L 136.062992 160.440945 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #80b8d8; stroke-width: 0.4; stroke-linecap: square"/>
+   </g>
+   <g id="patch_23">
+    <path d="M 210.897638 63.496063 
+L 214.866142 63.496063 
+L 214.866142 146.267717 
+L 210.897638 146.267717 
+z
+" clip-path="url(#p615db600ad)" style="fill: #e69f00"/>
+   </g>
+   <g id="patch_24">
+    <path d="M 375.307087 12.472441 
+L 379.275591 12.472441 
+L 379.275591 52.724409 
+L 375.307087 52.724409 
+z
+" clip-path="url(#p615db600ad)" style="fill: #009e73"/>
+   </g>
+   <g id="patch_25">
+    <path d="M 375.307087 66.330709 
+L 379.275591 66.330709 
+L 379.275591 106.582677 
+L 375.307087 106.582677 
+z
+" clip-path="url(#p615db600ad)" style="fill: #009e73"/>
+   </g>
+   <g id="patch_26">
+    <path d="M 375.307087 120.188976 
+L 379.275591 120.188976 
+L 379.275591 160.440945 
+L 375.307087 160.440945 
+z
+" clip-path="url(#p615db600ad)" style="fill: #d55e00"/>
+   </g>
+   <g id="patch_27">
+    <path d="M 375.307087 174.047244 
+L 379.275591 174.047244 
+L 379.275591 200.125984 
+L 375.307087 200.125984 
+z
+" clip-path="url(#p615db600ad)" style="fill: #cc79a7"/>
+   </g>
+   <g id="patch_28">
+    <path d="M 209.76378 96.377953 
+Q 181.417323 96.377953 153.741687 96.377953 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 155.741687 97.377953 
+L 153.741687 96.377953 
+L 155.741687 95.377953 
+z
+" clip-path="url(#p615db600ad)" style="fill: #222222; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_29">
+    <path d="M 153.070866 100.346457 
+Q 181.417323 100.346457 209.092959 100.346457 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 207.092959 99.346457 
+L 209.092959 100.346457 
+L 207.092959 101.346457 
+z
+" clip-path="url(#p615db600ad)" style="fill: #6b6b6b; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_30">
+    <path d="M 311.811024 73.700787 
+Q 342.992126 53.858268 373.607283 34.375895 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 371.383085 34.605985 
+L 373.607283 34.375895 
+L 372.456836 36.293308 
+z
+" clip-path="url(#p615db600ad)" style="fill: #222222; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_31">
+    <path d="M 374.173228 37.984252 
+Q 342.992126 57.826772 312.376969 77.309144 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 314.601167 77.079055 
+L 312.376969 77.309144 
+L 313.527416 75.391732 
+z
+" clip-path="url(#p615db600ad)" style="fill: #6b6b6b; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_32">
+    <path d="M 311.811024 93.543307 
+Q 342.992126 89.291339 373.508559 85.130007 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 371.391786 84.409403 
+L 373.508559 85.130007 
+L 371.662012 86.391063 
+z
+" clip-path="url(#p615db600ad)" style="fill: #222222; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_33">
+    <path d="M 374.173228 89.007874 
+Q 342.992126 93.259843 312.475693 97.421174 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 314.592466 98.141778 
+L 312.475693 97.421174 
+L 314.32224 96.160118 
+z
+" clip-path="url(#p615db600ad)" style="fill: #6b6b6b; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_34">
+    <path d="M 311.811024 119.055118 
+Q 342.992126 128.976378 373.533986 138.694243 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 371.931338 137.13491 
+L 373.533986 138.694243 
+L 371.324931 139.040761 
+z
+" clip-path="url(#p615db600ad)" style="fill: #222222; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_35">
+    <path d="M 374.173228 142.866142 
+Q 342.992126 132.944882 312.450266 123.227017 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 314.052914 124.78635 
+L 312.450266 123.227017 
+L 314.659321 122.880499 
+z
+" clip-path="url(#p615db600ad)" style="fill: #6b6b6b; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_36">
+    <path d="M 428.031496 161.574803 
+Q 428.031496 167.244094 428.031496 172.242565 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 429.031496 170.242565 
+L 428.031496 172.242565 
+L 427.031496 170.242565 
+z
+" clip-path="url(#p615db600ad)" style="fill: #222222; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_37">
+    <path d="M 445.03937 172.913386 
+Q 445.03937 167.244094 445.03937 162.245624 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 444.03937 164.245624 
+L 445.03937 162.245624 
+L 446.03937 164.245624 
+z
+" clip-path="url(#p615db600ad)" style="fill: #6b6b6b; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_38">
+    <path d="M 82.204724 212.598425 
+Q 82.204724 206.929134 82.204724 201.930663 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 81.204724 203.930663 
+L 82.204724 201.930663 
+L 83.204724 203.930663 
+z
+" clip-path="url(#p615db600ad)" style="fill: #6b6b6b; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_39">
+    <path d="M 260.787402 175.748031 
+Q 260.787402 161.574803 260.787402 148.072395 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 259.787402 150.072395 
+L 260.787402 148.072395 
+L 261.787402 150.072395 
+z
+" clip-path="url(#p615db600ad)" style="fill: #6b6b6b; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_40">
+    <path d="M 328.818898 219.685039 
+Q 338.740157 219.685039 347.990597 219.685039 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 345.990597 218.685039 
+L 347.990597 219.685039 
+L 345.990597 220.685039 
+z
+" clip-path="url(#p615db600ad)" style="fill: #222222; stroke: #222222; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_41">
+    <path d="M 382.677165 219.685039 
+Q 392.598425 219.685039 401.848865 219.685039 
+" clip-path="url(#p615db600ad)" style="fill: none; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 399.848865 218.685039 
+L 401.848865 219.685039 
+L 399.848865 220.685039 
+z
+" clip-path="url(#p615db600ad)" style="fill: #6b6b6b; stroke-dasharray: 1.8,1.2; stroke-dashoffset: 0; stroke: #6b6b6b; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="4.251969" y="13.736926" transform="rotate(-0 4.251969 13.736926)">a</text>
+   </g>
+   <g id="text_2">
+    <text style="font-weight: 700; font-size: 7px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="20.409449" y="31.980081" transform="rotate(-0 20.409449 31.980081)">SAP S/4HANA ERP</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="20.409449" y="41.213813" transform="rotate(-0 20.409449 41.213813)">本项目用 Node 模拟 OData V2 · :4004</text>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 6.2px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="20.409449" y="53.914793" transform="rotate(-0 20.409449 53.914793)">API_INBOUND_DELIVERY_SRV</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="20.409449" y="63.244753" transform="rotate(-0 20.409449 63.244753)">另有物料、出库交货、物料凭证</text>
+   </g>
+   <g id="text_6">
+    <text style="font-weight: 700; font-size: 6.2px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="28.346457" y="80.980626" transform="rotate(-0 28.346457 80.980626)">A_InbDeliveryHeader</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 5.4px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #6b6b6b" x="28.346457" y="90.410608" transform="rotate(-0 28.346457 90.410608)">key DeliveryDocument</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 5.4px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #6b6b6b" x="28.346457" y="99.536811" transform="rotate(-0 28.346457 99.536811)">OverallGoodsMovementStatus</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 5.4px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #0072b2" x="85.606299" y="113.85766" transform="rotate(-0 85.606299 113.85766)">1 : n</text>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 6.2px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="28.346457" y="129.169602" transform="rotate(-0 28.346457 129.169602)">A_InbDeliveryItem</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 5.4px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #6b6b6b" x="28.346457" y="138.599585" transform="rotate(-0 28.346457 138.599585)">Material, Plant, StorageLocation</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 5.4px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #6b6b6b" x="28.346457" y="146.536593" transform="rotate(-0 28.346457 146.536593)">ActualDeliveryQuantity, …Unit</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 5.4px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="28.346457" y="155.504592" transform="rotate(-0 28.346457 155.504592)">没有仓位，仓位在 WMS</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 5.4px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #0072b2" x="28.346457" y="169.780687" transform="rotate(-0 28.346457 169.780687)">PostGoodsReceipt()</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 5.4px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #0072b2" x="28.346457" y="179.326163" transform="rotate(-0 28.346457 179.326163)">回写物料凭证，移动类型 101</text>
+   </g>
+   <g id="text_16">
+    <text style="font-weight: 700; font-size: 7px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="218.834646" y="73.422055" transform="rotate(-0 218.834646 73.422055)">桥接 bridge</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="218.834646" y="82.577507" transform="rotate(-0 218.834646 82.577507)">Node.js · :8090</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="218.834646" y="94.55398" transform="rotate(-0 218.834646 94.55398)">轮询未过账交货</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="218.834646" y="104.203494" transform="rotate(-0 218.834646 104.203494)">工厂/库存地点 → 库位</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="218.834646" y="113.829571" transform="rotate(-0 218.834646 113.829571)">记录交货 ↔ 外部单号</text>
+   </g>
+   <g id="text_21">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="218.834646" y="123.455647" transform="rotate(-0 218.834646 123.455647)">上架后过账收货</text>
+   </g>
+   <g id="text_22">
+    <text style="font-weight: 700; font-size: 7px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="383.244094" y="22.106402" transform="rotate(-0 383.244094 22.106402)">OpenWMS Common</text>
+   </g>
+   <g id="text_23">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="383.244094" y="32.108963" transform="rotate(-0 383.244094 32.108963)">:8120</text>
+   </g>
+   <g id="text_24">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="383.244094" y="43.102389" transform="rotate(-0 383.244094 43.102389)">库位 Location · 托盘 TransportUnit</text>
+   </g>
+   <g id="text_25">
+    <text style="font-weight: 700; font-size: 7px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="383.244094" y="75.96467" transform="rotate(-0 383.244094 75.96467)">OpenWMS TMS</text>
+   </g>
+   <g id="text_26">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="383.244094" y="85.564856" transform="rotate(-0 383.244094 85.564856)">:8131 · 经 common-compat 查库位组</text>
+   </g>
+   <g id="text_27">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="383.244094" y="96.972376" transform="rotate(-0 383.244094 96.972376)">运输单 TransportOrder</text>
+   </g>
+   <g id="text_28">
+    <text style="font-weight: 700; font-size: 7px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="383.244094" y="130.128641" transform="rotate(-0 383.244094 130.128641)">openTCS 7.5 内核</text>
+   </g>
+   <g id="text_29">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="383.244094" y="139.926092" transform="rotate(-0 383.244094 139.926092)">:55200 · Web API</text>
+   </g>
+   <g id="text_30">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="383.244094" y="151.246893" transform="rotate(-0 383.244094 151.246893)">运输订单 · 路线 · 派车</text>
+   </g>
+   <g id="text_31">
+    <text style="font-weight: 700; font-size: 7px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="383.244094" y="184.609252" transform="rotate(-0 383.244094 184.609252)">Vehicle-01</text>
+   </g>
+   <g id="text_32">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="383.244094" y="193.292719" transform="rotate(-0 383.244094 193.292719)">Loopback 虚拟驱动</text>
+   </g>
+   <g id="text_33">
+    <g id="patch_42">
+     <path d="M 172.89826 92.811086 
+L 189.936385 92.811086 
+L 189.936385 84.070803 
+L 172.89826 84.070803 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: middle; fill: #0072b2" x="181.417323" y="90.583601" transform="rotate(-0 181.417323 90.583601)">S1–S5</text>
+   </g>
+   <g id="text_34">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: middle; fill: #6b6b6b" x="181.417323" y="113.120985" transform="rotate(-0 181.417323 113.120985)">OData V2</text>
+   </g>
+   <g id="text_35">
+    <g id="patch_43">
+     <path d="M 333.969626 48.590614 
+L 352.014626 48.590614 
+L 352.014626 39.850331 
+L 333.969626 39.850331 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: middle; fill: #009e73" x="342.992126" y="46.363129" transform="rotate(-0 342.992126 46.363129)">C1–C4</text>
+   </g>
+   <g id="text_36">
+    <g id="patch_44">
+     <path d="M 334.473063 86.574866 
+L 351.511188 86.574866 
+L 351.511188 77.834583 
+L 334.473063 77.834583 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: middle; fill: #009e73" x="342.992126" y="84.358162" transform="rotate(-0 342.992126 84.358162)">T1–T4</text>
+   </g>
+   <g id="text_37">
+    <g id="patch_45">
+     <path d="M 334.639938 142.133921 
+L 351.344313 142.133921 
+L 351.344313 133.393638 
+L 334.639938 133.393638 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: middle; fill: #d55e00" x="342.992126" y="139.906436" transform="rotate(-0 342.992126 139.906436)">F1–F6</text>
+   </g>
+   <g id="text_38">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: middle; fill: #6b6b6b" x="342.992126" y="155.703162" transform="rotate(-0 342.992126 155.703162)">REST · JSON</text>
+   </g>
+   <g id="text_39">
+    <text style="font-size: 5.4px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="449.291339" y="169.195266" transform="rotate(-0 449.291339 169.195266)">进程内驱动接口</text>
+   </g>
+   <g id="text_40">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: middle; fill: #6b6b6b" x="82.204724" y="224.547419" transform="rotate(-0 82.204724 224.547419)">练习脚本：S6 新建交货、S7 发货过账</text>
+   </g>
+   <g id="text_41">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: middle; fill: #222222" x="260.787402" y="186.975148" transform="rotate(-0 260.787402 186.975148)">调度板 board · :8080</text>
+   </g>
+   <g id="text_42">
+    <text style="font-size: 5.4px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: middle; fill: #6b6b6b" x="260.787402" y="196.407865" transform="rotate(-0 260.787402 196.407865)">只读：B1 及各系统查询接口</text>
+   </g>
+   <g id="text_43">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="352.913386" y="221.780742" transform="rotate(-0 352.913386 221.780742)">请求</text>
+   </g>
+   <g id="text_44">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="406.771654" y="221.780742" transform="rotate(-0 406.771654 221.780742)">响应 / 回报</text>
+   </g>
+   <g id="text_45">
+    <text style="font-size: 5.4px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="328.818898" y="231.788201" transform="rotate(-0 328.818898 231.788201)">编号与 b 表、图 2 中的消息一致</text>
+   </g>
+   <g id="text_46">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="4.251969" y="255.644386" transform="rotate(-0 4.251969 255.644386)">b</text>
+   </g>
+   <g id="text_47">
+    <text style="font-weight: 700; font-size: 6.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="11.338583" y="260.180881" transform="rotate(-0 11.338583 260.180881)">编号</text>
+   </g>
+   <g id="text_48">
+    <text style="font-weight: 700; font-size: 6.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="34.015748" y="260.19299" transform="rotate(-0 34.015748 260.19299)">方法</text>
+   </g>
+   <g id="text_49">
+    <text style="font-weight: 700; font-size: 6.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="68.031496" y="260.180881" transform="rotate(-0 68.031496 260.180881)">路径</text>
+   </g>
+   <g id="text_50">
+    <text style="font-weight: 700; font-size: 6.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="260.180881" transform="rotate(-0 320.314961 260.180881)">作用</text>
+   </g>
+   <g id="text_51">
+    <text style="font-weight: 700; font-size: 6.2px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="260.168772" transform="rotate(-0 445.03937 260.168772)">阶段</text>
+   </g>
+   <g id="text_52">
+    <text style="font-weight: 700; font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="18.141732" y="271.223176" transform="rotate(-0 18.141732 271.223176)">SAP ERP · {INB} = /sap/opu/odata/sap/API_INBOUND_DELIVERY_SRV;v=0002</text>
+   </g>
+   <g id="text_53">
+    <text style="font-size: 5.4px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #6b6b6b" x="18.141732" y="282.527497" transform="rotate(-0 18.141732 282.527497)">{PROD} = API_PRODUCT_SRV，{OUT} = API_OUTBOUND_DELIVERY_SRV;v=0002；过账需 X-CSRF-Token 与 If-Match</text>
+   </g>
+   <g id="text_54">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #0072b2" x="13.03937" y="293.969428" transform="rotate(-0 13.03937 293.969428)">S1</text>
+   </g>
+   <g id="text_55">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="293.898006" transform="rotate(-0 34.015748 293.898006)">GET</text>
+   </g>
+   <g id="text_56">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="293.511147" transform="rotate(-0 68.031496 293.511147)">{INB}/$metadata</text>
+   </g>
+   <g id="text_57">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="293.889272" transform="rotate(-0 320.314961 293.889272)">就绪探测，读元数据</text>
+   </g>
+   <g id="text_58">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="293.99474" transform="rotate(-0 445.03937 293.99474)">①</text>
+   </g>
+   <g id="text_59">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #0072b2" x="13.03937" y="305.024546" transform="rotate(-0 13.03937 305.024546)">S2</text>
+   </g>
+   <g id="text_60">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="304.953124" transform="rotate(-0 34.015748 304.953124)">GET</text>
+   </g>
+   <g id="text_61">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="304.351452" transform="rotate(-0 68.031496 304.351452)">{INB}/A_InbDeliveryHeader?$filter=…Status eq 'A'</text>
+   </g>
+   <g id="text_62">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="305.026421" transform="rotate(-0 320.314961 305.026421)">轮询未过账入库交货</text>
+   </g>
+   <g id="text_63">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="305.049859" transform="rotate(-0 445.03937 305.049859)">②</text>
+   </g>
+   <g id="text_64">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #0072b2" x="13.03937" y="316.079664" transform="rotate(-0 13.03937 316.079664)">S3</text>
+   </g>
+   <g id="text_65">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="316.008242" transform="rotate(-0 34.015748 316.008242)">GET</text>
+   </g>
+   <g id="text_66">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="315.391695" transform="rotate(-0 68.031496 315.391695)">{INB}/A_InbDeliveryHeader('1800000001')</text>
+   </g>
+   <g id="text_67">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="315.65357" transform="rotate(-0 320.314961 315.65357)">读交货状态与 ETag</text>
+   </g>
+   <g id="text_68">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="316.104977" transform="rotate(-0 445.03937 316.104977)">⑥</text>
+   </g>
+   <g id="text_69">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #0072b2" x="13.03937" y="327.134782" transform="rotate(-0 13.03937 327.134782)">S4</text>
+   </g>
+   <g id="text_70">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="327.071063" transform="rotate(-0 34.015748 327.071063)">HEAD</text>
+   </g>
+   <g id="text_71">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="326.676501" transform="rotate(-0 68.031496 326.676501)">{INB}/        X-CSRF-Token: Fetch</text>
+   </g>
+   <g id="text_72">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="327.136657" transform="rotate(-0 320.314961 327.136657)">取 CSRF 令牌</text>
+   </g>
+   <g id="text_73">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="327.160095" transform="rotate(-0 445.03937 327.160095)">⑥</text>
+   </g>
+   <g id="text_74">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #0072b2" x="13.03937" y="338.1899" transform="rotate(-0 13.03937 338.1899)">S5</text>
+   </g>
+   <g id="text_75">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="338.12165" transform="rotate(-0 34.015748 338.12165)">POST</text>
+   </g>
+   <g id="text_76">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="337.501932" transform="rotate(-0 68.031496 337.501932)">{INB}/PostGoodsReceipt?DeliveryDocument='1800000001'</text>
+   </g>
+   <g id="text_77">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="338.133182" transform="rotate(-0 320.314961 338.133182)">过账收货，移动类型 101</text>
+   </g>
+   <g id="text_78">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="338.215213" transform="rotate(-0 445.03937 338.215213)">⑥</text>
+   </g>
+   <g id="text_79">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #0072b2" x="13.03937" y="349.245018" transform="rotate(-0 13.03937 349.245018)">S6</text>
+   </g>
+   <g id="text_80">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="349.173597" transform="rotate(-0 34.015748 349.173597)">GET</text>
+   </g>
+   <g id="text_81">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="348.55705" transform="rotate(-0 68.031496 348.55705)">{PROD}/A_Product    A_ProductStorageLocation</text>
+   </g>
+   <g id="text_82">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="349.211737" transform="rotate(-0 320.314961 349.211737)">同步物料和库存地点</text>
+   </g>
+   <g id="text_83">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="349.270331" transform="rotate(-0 445.03937 349.270331)">①</text>
+   </g>
+   <g id="text_84">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #0072b2" x="13.03937" y="360.300137" transform="rotate(-0 13.03937 360.300137)">S7</text>
+   </g>
+   <g id="text_85">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="360.231887" transform="rotate(-0 34.015748 360.231887)">POST</text>
+   </g>
+   <g id="text_86">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="359.612168" transform="rotate(-0 68.031496 359.612168)">{OUT}/PostGoodsIssue?DeliveryDocument='8000000001'</text>
+   </g>
+   <g id="text_87">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="360.231699" transform="rotate(-0 320.314961 360.231699)">发货过账，本链路不自动调用</text>
+   </g>
+   <g id="text_88">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="360.325449" transform="rotate(-0 445.03937 360.325449)">出库</text>
+   </g>
+   <g id="text_89">
+    <text style="font-weight: 700; font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="18.141732" y="370.719239" transform="rotate(-0 18.141732 370.719239)">OpenWMS Common · http://openwms-common:8120</text>
+   </g>
+   <g id="text_90">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #009e73" x="13.03937" y="382.410373" transform="rotate(-0 13.03937 382.410373)">C1</text>
+   </g>
+   <g id="text_91">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="382.338951" transform="rotate(-0 34.015748 382.338951)">GET</text>
+   </g>
+   <g id="text_92">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="382.382592" transform="rotate(-0 68.031496 382.382592)">/actuator/info</text>
+   </g>
+   <g id="text_93">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="382.412248" transform="rotate(-0 320.314961 382.412248)">就绪探测</text>
+   </g>
+   <g id="text_94">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="382.435685" transform="rotate(-0 445.03937 382.435685)">①</text>
+   </g>
+   <g id="text_95">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #009e73" x="13.03937" y="393.465491" transform="rotate(-0 13.03937 393.465491)">C2</text>
+   </g>
+   <g id="text_96">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="393.397241" transform="rotate(-0 34.015748 393.397241)">GET POST</text>
+   </g>
+   <g id="text_97">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="393.410585" transform="rotate(-0 68.031496 393.410585)">/v1/locations?locationId=…</text>
+   </g>
+   <g id="text_98">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="393.502522" transform="rotate(-0 320.314961 393.502522)">查询 / 创建库位</text>
+   </g>
+   <g id="text_99">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="393.490803" transform="rotate(-0 445.03937 393.490803)">①</text>
+   </g>
+   <g id="text_100">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #009e73" x="13.03937" y="404.520609" transform="rotate(-0 13.03937 404.520609)">C3</text>
+   </g>
+   <g id="text_101">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="404.452359" transform="rotate(-0 34.015748 404.452359)">GET POST</text>
+   </g>
+   <g id="text_102">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="403.83264" transform="rotate(-0 68.031496 403.83264)">/v1/transport-units?bk=…[&amp;actualLocation=…&amp;tut=PALLET]</text>
+   </g>
+   <g id="text_103">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="404.55764" transform="rotate(-0 320.314961 404.55764)">查询 / 创建托盘</text>
+   </g>
+   <g id="text_104">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="404.545922" transform="rotate(-0 445.03937 404.545922)">①</text>
+   </g>
+   <g id="text_105">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #009e73" x="13.03937" y="415.575727" transform="rotate(-0 13.03937 415.575727)">C4</text>
+   </g>
+   <g id="text_106">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="415.504305" transform="rotate(-0 34.015748 415.504305)">PATCH</text>
+   </g>
+   <g id="text_107">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="414.887758" transform="rotate(-0 68.031496 414.887758)">/v1/transport-units?bk=…&amp;newLocation=…</text>
+   </g>
+   <g id="text_108">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="415.589321" transform="rotate(-0 320.314961 415.589321)">移动托盘</text>
+   </g>
+   <g id="text_109">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="415.60104" transform="rotate(-0 445.03937 415.60104)">③ ⑥</text>
+   </g>
+   <g id="text_110">
+    <text style="font-weight: 700; font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="18.141732" y="425.99483" transform="rotate(-0 18.141732 425.99483)">OpenWMS TMS · http://openwms-tms:8131</text>
+   </g>
+   <g id="text_111">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #009e73" x="13.03937" y="437.685026" transform="rotate(-0 13.03937 437.685026)">T1</text>
+   </g>
+   <g id="text_112">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="437.614541" transform="rotate(-0 34.015748 437.614541)">GET</text>
+   </g>
+   <g id="text_113">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="437.658182" transform="rotate(-0 68.031496 437.658182)">/actuator/info</text>
+   </g>
+   <g id="text_114">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="437.687838" transform="rotate(-0 320.314961 437.687838)">就绪探测</text>
+   </g>
+   <g id="text_115">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="437.711276" transform="rotate(-0 445.03937 437.711276)">①</text>
+   </g>
+   <g id="text_116">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #009e73" x="13.03937" y="448.770613" transform="rotate(-0 13.03937 448.770613)">T2</text>
+   </g>
+   <g id="text_117">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="448.672831" transform="rotate(-0 34.015748 448.672831)">POST</text>
+   </g>
+   <g id="text_118">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="448.053113" transform="rotate(-0 68.031496 448.053113)">/v1/transport-orders</text>
+   </g>
+   <g id="text_119">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="448.684363" transform="rotate(-0 320.314961 448.684363)">创建运输单，返回 201 + Location</text>
+   </g>
+   <g id="text_120">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="448.766394" transform="rotate(-0 445.03937 448.766394)">③</text>
+   </g>
+   <g id="text_121">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #009e73" x="13.03937" y="459.7962" transform="rotate(-0 13.03937 459.7962)">T3</text>
+   </g>
+   <g id="text_122">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="459.724778" transform="rotate(-0 34.015748 459.724778)">GET</text>
+   </g>
+   <g id="text_123">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="459.108231" transform="rotate(-0 68.031496 459.108231)">/v1/transport-orders/{pKey}</text>
+   </g>
+   <g id="text_124">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="459.809793" transform="rotate(-0 320.314961 459.809793)">读运输单状态</text>
+   </g>
+   <g id="text_125">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="459.821512" transform="rotate(-0 445.03937 459.821512)">③ ⑥</text>
+   </g>
+   <g id="text_126">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #009e73" x="13.03937" y="470.862099" transform="rotate(-0 13.03937 470.862099)">T4</text>
+   </g>
+   <g id="text_127">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="470.783068" transform="rotate(-0 34.015748 470.783068)">POST</text>
+   </g>
+   <g id="text_128">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="470.163349" transform="rotate(-0 68.031496 470.163349)">/v1/transport-orders/{pKey}?state=STARTED|FINISHED|ONFAILURE|CANCELED</text>
+   </g>
+   <g id="text_129">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="470.864911" transform="rotate(-0 320.314961 470.864911)">改运输单状态</text>
+   </g>
+   <g id="text_130">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="470.87663" transform="rotate(-0 445.03937 470.87663)">③ ⑥</text>
+   </g>
+   <g id="text_131">
+    <text style="font-weight: 700; font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="18.141732" y="481.27042" transform="rotate(-0 18.141732 481.27042)">openTCS · http://opentcs:55200</text>
+   </g>
+   <g id="text_132">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #d55e00" x="13.03937" y="492.960616" transform="rotate(-0 13.03937 492.960616)">F1</text>
+   </g>
+   <g id="text_133">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="492.890132" transform="rotate(-0 34.015748 492.890132)">GET</text>
+   </g>
+   <g id="text_134">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="492.918898" transform="rotate(-0 68.031496 492.918898)">/v1/kernel/version</text>
+   </g>
+   <g id="text_135">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="492.963429" transform="rotate(-0 320.314961 492.963429)">就绪探测</text>
+   </g>
+   <g id="text_136">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="492.986866" transform="rotate(-0 445.03937 492.986866)">①</text>
+   </g>
+   <g id="text_137">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #d55e00" x="13.03937" y="504.046203" transform="rotate(-0 13.03937 504.046203)">F2</text>
+   </g>
+   <g id="text_138">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="503.94525" transform="rotate(-0 34.015748 503.94525)">GET PUT</text>
+   </g>
+   <g id="text_139">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="503.328703" transform="rotate(-0 68.031496 503.328703)">/v1/plantModel</text>
+   </g>
+   <g id="text_140">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="504.030266" transform="rotate(-0 320.314961 504.030266)">读取 / 上传工厂模型</text>
+   </g>
+   <g id="text_141">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="504.041984" transform="rotate(-0 445.03937 504.041984)">①</text>
+   </g>
+   <g id="text_142">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #d55e00" x="13.03937" y="515.07179" transform="rotate(-0 13.03937 515.07179)">F3</text>
+   </g>
+   <g id="text_143">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="514.973634" transform="rotate(-0 34.015748 514.973634)">PUT</text>
+   </g>
+   <g id="text_144">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="514.383821" transform="rotate(-0 68.031496 514.383821)">/v1/vehicles/Vehicle-01/commAdapter/…</text>
+   </g>
+   <g id="text_145">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="514.657415" transform="rotate(-0 320.314961 514.657415)">挂 Loopback 驱动并允许接单</text>
+   </g>
+   <g id="text_146">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="515.097103" transform="rotate(-0 445.03937 515.097103)">①</text>
+   </g>
+   <g id="text_147">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #d55e00" x="13.03937" y="526.137689" transform="rotate(-0 13.03937 526.137689)">F4</text>
+   </g>
+   <g id="text_148">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="526.058658" transform="rotate(-0 34.015748 526.058658)">POST</text>
+   </g>
+   <g id="text_149">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="525.438939" transform="rotate(-0 68.031496 525.438939)">/v1/transportOrders/INB-{DeliveryDocument}</text>
+   </g>
+   <g id="text_150">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="526.128783" transform="rotate(-0 320.314961 526.128783)">下上架订单：收货位装货 → 存储位卸货</text>
+   </g>
+   <g id="text_151">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="526.152221" transform="rotate(-0 445.03937 526.152221)">④</text>
+   </g>
+   <g id="text_152">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #d55e00" x="13.03937" y="537.151558" transform="rotate(-0 13.03937 537.151558)">F5</text>
+   </g>
+   <g id="text_153">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="537.110604" transform="rotate(-0 34.015748 537.110604)">GET</text>
+   </g>
+   <g id="text_154">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="536.494058" transform="rotate(-0 68.031496 536.494058)">/v1/transportOrders/INB-{DeliveryDocument}</text>
+   </g>
+   <g id="text_155">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="537.19562" transform="rotate(-0 320.314961 537.19562)">读订单状态</text>
+   </g>
+   <g id="text_156">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="537.207339" transform="rotate(-0 445.03937 537.207339)">⑤</text>
+   </g>
+   <g id="text_157">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #d55e00" x="13.03937" y="548.237144" transform="rotate(-0 13.03937 548.237144)">F6</text>
+   </g>
+   <g id="text_158">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="548.168894" transform="rotate(-0 34.015748 548.168894)">POST</text>
+   </g>
+   <g id="text_159">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="547.564051" transform="rotate(-0 68.031496 547.564051)">/v1/transportOrders/INB-{DeliveryDocument}/withdrawal?immediate=false</text>
+   </g>
+   <g id="text_160">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="548.250738" transform="rotate(-0 320.314961 548.250738)">失败时撤回订单</text>
+   </g>
+   <g id="text_161">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="548.227301" transform="rotate(-0 445.03937 548.227301)">失败</text>
+   </g>
+   <g id="text_162">
+    <text style="font-weight: 700; font-size: 5.8px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="18.141732" y="558.797622" transform="rotate(-0 18.141732 558.797622)">桥接 · http://bridge:8090</text>
+   </g>
+   <g id="text_163">
+    <text style="font-weight: 700; font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #e69f00" x="13.03937" y="570.346443" transform="rotate(-0 13.03937 570.346443)">B1</text>
+   </g>
+   <g id="text_164">
+    <text style="font-size: 5.8px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="34.015748" y="570.275959" transform="rotate(-0 34.015748 570.275959)">GET</text>
+   </g>
+   <g id="text_165">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei Mono', 'Noto Sans CJK SC', 'Consolas', 'Microsoft YaHei'; text-anchor: start; fill: #222222" x="68.031496" y="570.304724" transform="rotate(-0 68.031496 570.304724)">/status   /health</text>
+   </g>
+   <g id="text_166">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="320.314961" y="570.290662" transform="rotate(-0 320.314961 570.290662)">进度、对照 links、日志</text>
+   </g>
+   <g id="text_167">
+    <text style="font-size: 6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #222222" x="445.03937" y="570.349256" transform="rotate(-0 445.03937 570.349256)">观测</text>
+   </g>
+   <g id="text_168">
+    <text style="font-size: 5.6px; font-family: 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Microsoft YaHei', 'Arial'; text-anchor: start; fill: #6b6b6b" x="11.338583" y="584.994079" transform="rotate(-0 11.338583 584.994079)">阶段：① 初始化  ② 查询交货  ③ 仓库下单  ④ 车队下单  ⑤ 执行监控  ⑥ 收货过账（与图 2 对应）。车辆与 openTCS 之间是进程内驱动接口，没有 HTTP 端点。</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p615db600ad">
+   <rect x="0" y="0" width="510.23622" height="598.110236"/>
+  </clipPath>
+ </defs>
+</svg>
